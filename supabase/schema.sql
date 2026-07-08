@@ -42,6 +42,15 @@ create table if not exists public.completions (
   unique (team_id, station_id)                 -- one score per team/station
 );
 
+create table if not exists public.settings (
+  id                 int  primary key default 1,
+  leaderboard_public boolean not null default true,
+  constraint singleton check (id = 1)
+);
+
+insert into public.settings (id, leaderboard_public) values (1, true)
+on conflict (id) do nothing;
+
 -- ----------------------------------------------------------------------------
 --  Indexes
 -- ----------------------------------------------------------------------------
@@ -97,8 +106,11 @@ drop policy if exists "insert teams"   on public.teams;
 create policy "insert teams"   on public.teams   for insert with check (true);
 drop policy if exists "insert members" on public.members;
 create policy "insert members" on public.members for insert with check (true);
-drop policy if exists "delete members" on public.members;
-create policy "delete members" on public.members for delete using (true);
+-- NOTE: members can no longer be deleted by teams/anon — only via the admin
+-- (service-role key), which bypasses RLS.
+
+drop policy if exists "read settings" on public.settings;
+create policy "read settings" on public.settings for select using (true);
 
 -- ----------------------------------------------------------------------------
 --  RPC: award / update a team's score for a station  (advisor only)

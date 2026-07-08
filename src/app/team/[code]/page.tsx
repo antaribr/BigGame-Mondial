@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { FormEvent } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Shell, Stat, TabButton, Skeleton, LeaderboardList } from "@/components/ui";
@@ -11,11 +10,10 @@ import {
   fetchStations,
   fetchCompletionsForTeam,
   fetchLeaderboard,
-  addMember,
-  removeMember,
+  fetchSettings,
 } from "@/lib/api";
 import { useDataChanged } from "@/lib/useRealtime";
-import type { Team, Member, Station, Completion, LeaderboardRow } from "@/lib/types";
+import type { Team, Member, Station, Completion, LeaderboardRow, Settings } from "@/lib/types";
 
 export default function TeamDashboardPage() {
   const params = useParams<{ code: string }>();
@@ -26,9 +24,12 @@ export default function TeamDashboardPage() {
   const [stations, setStations] = useState<Station[]>([]);
   const [completions, setCompletions] = useState<Completion[]>([]);
   const [leaderboard, setLeaderboard] = useState<LeaderboardRow[]>([]);
+  const [settings, setSettings] = useState<Settings>({ id: 1, leaderboard_public: true });
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [tab, setTab] = useState<"tasks" | "board">("tasks");
+
+  const boardOpen = settings.leaderboard_public;
 
   const load = useCallback(async () => {
     const t = await fetchTeamByCode(code);
@@ -38,23 +39,29 @@ export default function TeamDashboardPage() {
       return;
     }
     setTeam(t);
-    const [m, s, c, lb] = await Promise.all([
+    const [s, set, c, lb, stg] = await Promise.all([
       fetchMembers(t.id),
       fetchStations(),
       fetchCompletionsForTeam(t.id),
-      fetchLeaderboard(),
+      // Only fetch the full leaderboard when it's public — when private the
+      // team must not be able to see other teams' points "in any way".
+      fetchSettings().then((cfg) =>
+        cfg.leaderboard_public ? fetchLeaderboard() : Promise.resolve([]),
+      ),
+      fetchSettings(),
     ]);
-    setMembers(m);
-    setStations(s);
+    setMembers(s);
+    setStations(set);
     setCompletions(c);
     setLeaderboard(lb);
+    setSettings(stg);
     setLoading(false);
   }, [code]);
 
   useEffect(() => {
     load();
   }, [load]);
-  useDataChanged(["completions", "teams", "members", "stations"], load);
+  useDataChanged(["completions", "teams", "members", "stations", "settings"], load);
 
   const byStation = useMemo(() => {
     const map = new Map<string, Completion>();
@@ -62,6 +69,7 @@ export default function TeamDashboardPage() {
     return map;
   }, [completions]);
 
+  // The team can ALWAYS see its own points (sum of its completions).
   const totalPoints = completions.reduce((a, c) => a + c.score, 0);
   const myRow = leaderboard.find((r) => r.team_id === team?.id);
 
@@ -90,14 +98,16 @@ export default function TeamDashboardPage() {
   return (
     <Shell>
       {/* Header */}
-      <div className="card relative overflow-hidden p-6">
-        <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-gradient-to-br from-indigo-400/25 to-fuchsia-400/20 blur-3xl" />
-        <div className="relative flex flex-wrap items-start justify-between gap-4">
+      <div className="card relative overflow-hidden p-5 sm:p-6">
+        <div className="absolute -right-16 -top-16 h-40 w-40 rounded-full bg-gradient-to-br from-indigo-400/25 to-fuchsia-400/20 blur-3xl" />
+        <div className="relative flex flex-col gap-4">
           <div className="min-w-0">
             <div className="text-xs uppercase tracking-widest text-fuchsia-600">
               Your team
             </div>
-            <h1 className="font-display text-3xl font-bold">{team.name}</h1>
+            <h1 className="font-display text-2xl font-bold leading-tight sm:text-3xl">
+              {team.name}
+            </h1>
             <div className="mt-2 flex items-center gap-2 text-sm text-slate-500">
               <span>Code:</span>
               <button
@@ -107,33 +117,62 @@ export default function TeamDashboardPage() {
               >
                 {team.code}
               </button>
-              <span className="text-xs text-slate-400">(tap to copy)</span>
             </div>
           </div>
-          <div className="grid grid-cols-3 gap-2">
+          {/* Stats: always show own points + tasks. Show rank only if board open. */}
+          <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
             <Stat label="Points" value={totalPoints} />
             <Stat
               label="Done"
               value={`${completions.length}/${stations.length}`}
             />
-            <Stat label="Rank" value={myRow ? `#${myRow.rank}` : "—"} />
+            {boardOpen && (
+              <Stat label="Rank" value={myRow ? `#${myRow.rank}` : "—"} />
+            )}
           </div>
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="mt-5 flex rounded-xl border border-slate-200 bg-slate-100 p-1">
-        <TabButton active={tab === "tasks"} onClick={() => setTab("tasks")}>
-          My Tasks
-        </TabButton>
-        <TabButton active={tab === "board"} onClick={() => setTab("board")}>
-          Leaderboard
-        </TabButton>
-      </div>
+      {/* Tabs — only when the leaderboard is public */}
+      {boardOpen && (
+        <div className="mt-5 flex rounded-xl border border-slate-200 bg-slate-100 p-1">
+          <TabButton active={tab === "tasks"} onClick={() => setTab("tasks")}>
+            My Tasks
+          </TabButton>
+          <TabButton active={tab === "board"} onClick={() => setTab("board")}>
+            Leaderboard
+          </TabButton>
+        </div>
+      )}
 
-      {tab === "tasks" ? (
+      {!boardOpen && (
+        <div className="mt-5 rounded-xl border border-amber-300 bg-amber-50 px-4 py-2.5 text-sm text-amber-700">
+          🔒 The live leaderboard is currently hidden by the organizer.
+        </div>
+      )}
+
+      {(boardOpen ? tab === "tasks" : true) && (
         <div className="mt-5 space-y-5">
-          <MembersPanel teamId={team.id} members={members} onChange={load} />
+          {/* Members — READ ONLY (only the admin can change them) */}
+          <div className="card p-4">
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-slate-500">
+              Members ({members.length})
+            </h2>
+            {members.length === 0 ? (
+              <p className="text-sm text-slate-400">No members yet.</p>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {members.map((m) => (
+                  <span
+                    key={m.id}
+                    className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 py-1 pl-3 pr-3 text-sm text-slate-800"
+                  >
+                    {m.name}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
 
           <div>
             <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-slate-500">
@@ -182,7 +221,9 @@ export default function TeamDashboardPage() {
             )}
           </div>
         </div>
-      ) : (
+      )}
+
+      {boardOpen && tab === "board" && (
         <LeaderboardList
           rows={leaderboard}
           currentTeamId={team.id}
@@ -190,74 +231,5 @@ export default function TeamDashboardPage() {
         />
       )}
     </Shell>
-  );
-}
-
-function MembersPanel({
-  teamId,
-  members,
-  onChange,
-}: {
-  teamId: string;
-  members: Member[];
-  onChange: () => void;
-}) {
-  const [name, setName] = useState("");
-  const [busy, setBusy] = useState(false);
-
-  async function add(e: FormEvent) {
-    e.preventDefault();
-    if (!name.trim()) return;
-    setBusy(true);
-    try {
-      await addMember(teamId, name);
-      setName("");
-      onChange();
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <div className="card p-4">
-      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-slate-500">
-        Members ({members.length})
-      </h2>
-      <div className="flex flex-wrap gap-2">
-        {members.map((m) => (
-          <span
-            key={m.id}
-            className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 py-1 pl-3 pr-1.5 text-sm text-slate-800"
-          >
-            {m.name}
-            <button
-              onClick={async () => {
-                await removeMember(m.id);
-                onChange();
-              }}
-              className="grid h-5 w-5 place-items-center rounded-full bg-slate-200 text-xs text-slate-600 hover:bg-red-100 hover:text-red-600"
-              aria-label={`Remove ${m.name}`}
-            >
-              ✕
-            </button>
-          </span>
-        ))}
-        {members.length === 0 && (
-          <span className="text-sm text-slate-400">No members yet.</span>
-        )}
-      </div>
-      <form onSubmit={add} className="mt-3 flex gap-2">
-        <input
-          className="input"
-          placeholder="Add a member…"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          maxLength={40}
-        />
-        <button className="btn-primary" disabled={busy || !name.trim()}>
-          Add
-        </button>
-      </form>
-    </div>
   );
 }

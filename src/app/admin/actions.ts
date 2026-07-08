@@ -102,3 +102,55 @@ export async function resetGameData(): Promise<Result> {
     return { ok: false, error: e instanceof Error ? e.message : "Failed" };
   }
 }
+
+/* --------------------- Member management (admin) -------------------- */
+
+export async function addTeamMember(
+  teamId: string,
+  name: string,
+): Promise<Result> {
+  if (!(await isAdmin())) return { ok: false, error: "Unauthorized" };
+  if (!name.trim()) return { ok: false, error: "Name is required." };
+  try {
+    const supa = adminClient();
+    const { error } = await supa
+      .from("members")
+      .insert({ team_id: teamId, name: name.trim() });
+    if (error) return { ok: false, error: error.message };
+    revalidatePath("/admin");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Failed" };
+  }
+}
+
+export async function removeTeamMember(memberId: string): Promise<Result> {
+  if (!(await isAdmin())) return { ok: false, error: "Unauthorized" };
+  try {
+    const supa = adminClient();
+    const { error } = await supa.from("members").delete().eq("id", memberId);
+    if (error) return { ok: false, error: error.message };
+    revalidatePath("/admin");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Failed" };
+  }
+}
+
+/* --------------- Leaderboard visibility toggle (admin) --------------- */
+
+export async function setLeaderboardPublic(value: boolean): Promise<Result> {
+  if (!(await isAdmin())) return { ok: false, error: "Unauthorized" };
+  try {
+    const supa = adminClient();
+    const { error } = await supa
+      .from("settings")
+      .update({ leaderboard_public: value })
+      .eq("id", 1);
+    if (error) return { ok: false, error: error.message };
+    revalidatePath("/admin");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Failed" };
+  }
+}

@@ -37,3 +37,8 @@ export type LeaderboardRow = {
   total_points: number;
   rank: number;
 };
+
+export type Settings = {
+  id: number;
+  leaderboard_public: boolean;
+};

@@ -6,6 +6,7 @@ import type {
   Station,
   Completion,
   LeaderboardRow,
+  Settings,
 } from "./types";
 
 /* ----------------------------- Reads ----------------------------- */
@@ -82,6 +83,25 @@ export async function fetchLeaderboard(): Promise<LeaderboardRow[]> {
   return (data ?? []) as LeaderboardRow[];
 }
 
+/** Returns the single settings row (defaults to public if unset). */
+export async function fetchSettings(): Promise<Settings> {
+  const { data } = await supabase
+    .from("settings")
+    .select("*")
+    .eq("id", 1)
+    .maybeSingle();
+  return (data as Settings | null) ?? { id: 1, leaderboard_public: true };
+}
+
+/** All members across all teams (used by the admin roster manager). */
+export async function fetchAllMembers(): Promise<Member[]> {
+  const { data } = await supabase
+    .from("members")
+    .select("*")
+    .order("created_at", { ascending: true });
+  return (data ?? []) as Member[];
+}
+
 /* ----------------------------- Writes ---------------------------- */
 
 /** Create a team + its members. Retries on rare code collisions. */
@@ -111,18 +131,6 @@ export async function registerTeam(
     await supabase.from("members").insert(rows);
   }
   return team;
-}
-
-export async function addMember(teamId: string, name: string): Promise<void> {
-  const { error } = await supabase
-    .from("members")
-    .insert({ team_id: teamId, name: name.trim() });
-  if (error) throw error;
-}
-
-export async function removeMember(id: string): Promise<void> {
-  const { error } = await supabase.from("members").delete().eq("id", id);
-  if (error) throw error;
 }
 
 /** Advisor awards a score (1–10) to a team at this station. */
