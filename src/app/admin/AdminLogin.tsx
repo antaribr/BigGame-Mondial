@@ -27,10 +27,7 @@ export default function AdminLogin() {
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-5 py-6">
       <header className="mb-8 flex items-center justify-between">
-        <Brand />
-        <Link href="/" className="text-sm text-slate-500 hover:text-slate-900">
-          ← Home
-        </Link>
+        <Brand home="/admin" />
       </header>
 
       <form onSubmit={submit} className="card space-y-4 p-6">

@@ -67,14 +67,14 @@ export default function TeamDashboardPage() {
 
   if (loading)
     return (
-      <Shell back="/team" backLabel="← Switch team">
+      <Shell>
         <Skeleton />
       </Shell>
     );
 
   if (notFound || !team)
     return (
-      <Shell back="/team" backLabel="← Switch team">
+      <Shell>
         <div className="card p-8 text-center">
           <p className="text-lg font-semibold">Team not found</p>
           <p className="mt-1 text-sm text-slate-500">
@@ -88,7 +88,7 @@ export default function TeamDashboardPage() {
     );
 
   return (
-    <Shell back="/team" backLabel="← Switch team">
+    <Shell>
       {/* Header */}
       <div className="card relative overflow-hidden p-6">
         <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-gradient-to-br from-indigo-400/25 to-fuchsia-400/20 blur-3xl" />

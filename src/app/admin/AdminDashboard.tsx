@@ -109,7 +109,7 @@ export default function AdminDashboard() {
   return (
     <main className="mx-auto max-w-4xl px-4 py-6 sm:px-5">
       <header className="mb-6 flex items-center justify-between">
-        <Brand />
+        <Brand home="/admin" />
         <div className="flex items-center gap-2">
           <Link href="/scoreboard" className="btn-ghost text-sm">
             📊 Scoreboard

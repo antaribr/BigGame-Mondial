@@ -5,10 +5,12 @@ import type { ReactNode } from "react";
 import { Brand } from "./Brand";
 import type { LeaderboardRow } from "@/lib/types";
 
-/** Standard page shell: top nav + centered container. */
+/** Standard page shell: top nav + centered container.
+ *  Pass `back` to show a back link (and make the logo clickable).
+ *  Omit it to "lock in" the user — no back link, static logo. */
 export function Shell({
   children,
-  back = "/",
+  back,
   backLabel = "← Back",
 }: {
   children: ReactNode;
@@ -18,13 +20,15 @@ export function Shell({
   return (
     <main className="mx-auto flex min-h-screen max-w-3xl flex-col px-4 py-5 sm:px-5">
       <header className="mb-5 flex items-center justify-between">
-        <Brand />
-        <Link
-          href={back}
-          className="text-sm text-slate-500 hover:text-slate-900"
-        >
-          {backLabel}
-        </Link>
+        <Brand home={back} />
+        {back && (
+          <Link
+            href={back}
+            className="text-sm text-slate-500 hover:text-slate-900"
+          >
+            {backLabel}
+          </Link>
+        )}
       </header>
       {children}
     </main>

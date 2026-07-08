@@ -1,8 +1,8 @@
 import { createClient } from "@supabase/supabase-js";
 
 const url =
-  process.env.NEXT_PUBLIC_SUPABASE_URL || "https://dymiiwnnhvgjoipyhrag.supabase.co";
-const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR5bWlpd25uaHZnam9pcHlocmFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1MzE2OTUsImV4cCI6MjA5OTEwNzY5NX0.p6v5zxpTQ64YWyo_0oPDBdoIAlE13lahPmpdJgxczhE";
+  process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder.supabase.co";
+const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "public-anon-key";
 
 /**
  * Browser/anon Supabase client used across the whole app.

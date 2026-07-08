@@ -23,7 +23,7 @@ to **Vercel**, source on **GitHub**.
 
 | Route | Who | What it does |
 |-------|-----|--------------|
-| `/` | organizer | Neutral hub — links to scoreboard & admin only (no team/advisor split) |
+| `/` | — | Redirects to `/team` (no landing/choose screen) |
 | `/team` | team | **Team portal entry** — register a team + members, or rejoin with a code |
 | `/team/[code]` | team | See all stations, your progress, points, rank, and the **public leaderboard** (live) |
 | `/advisor` | advisor | **Advisor portal entry** — enter your station code |

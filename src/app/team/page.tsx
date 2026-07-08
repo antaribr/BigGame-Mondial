@@ -3,7 +3,6 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { Brand } from "@/components/Brand";
 import { TabButton } from "@/components/ui";
 import { registerTeam, fetchTeamByCode } from "@/lib/api";
@@ -17,14 +16,7 @@ export default function TeamEntryPage() {
   return (
     <main className="mx-auto flex min-h-screen max-w-xl flex-col px-5 py-6">
       <header className="mb-8 flex items-center justify-between">
-        <Brand />
-        {/* Team portal — no link to advisor or the shared home. */}
-        <Link
-          href="/scoreboard"
-          className="text-sm text-slate-500 hover:text-slate-900"
-        >
-          📊 Scoreboard
-        </Link>
+        <Brand home="/team" />
       </header>
 
       <div className="flex rounded-xl border border-slate-200 bg-slate-100 p-1">

@@ -37,8 +37,7 @@ export default function AdvisorEntryPage() {
   return (
     <main className="mx-auto flex min-h-screen max-w-xl flex-col px-5 py-6">
       <header className="mb-8 flex items-center justify-between">
-        <Brand />
-        {/* Advisor portal — no link to team or the shared home. */}
+        <Brand home="/advisor" />
         <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-500 shadow-sm">
           🎯 Advisor portal
         </span>
