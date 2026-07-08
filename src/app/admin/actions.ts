@@ -145,8 +145,7 @@ export async function setLeaderboardPublic(value: boolean): Promise<Result> {
     const supa = adminClient();
     const { error } = await supa
       .from("settings")
-      .update({ leaderboard_public: value })
-      .eq("id", 1);
+      .upsert({ id: 1, leaderboard_public: value });
     if (error) return { ok: false, error: error.message };
     revalidatePath("/admin");
     return { ok: true };
