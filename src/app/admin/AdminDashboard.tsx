@@ -49,10 +49,23 @@ export default function AdminDashboard() {
 
   const boardOpen = settings.leaderboard_public;
 
+  const [toggleError, setToggleError] = useState<string | null>(null);
+
   async function toggleBoard() {
+    setToggleError(null);
     const next = !boardOpen;
     setSettings((s) => ({ ...s, leaderboard_public: next })); // optimistic
-    await setLeaderboardPublic(next);
+    const res = await setLeaderboardPublic(next);
+    if (!res.ok) {
+      // Revert on failure and show why — never silently flip back.
+      setSettings((s) => ({ ...s, leaderboard_public: !next }));
+      setToggleError(
+        res.error?.includes("Could not find the table")
+          ? "The settings table is missing. Run migration_settings.sql in Supabase."
+          : res.error ?? "Could not change leaderboard visibility.",
+      );
+      return;
+    }
     await load();
   }
 
@@ -177,6 +190,11 @@ export default function AdminDashboard() {
               ? "Teams can see the rankings & everyone's points."
               : "Teams can only see their own points."}
           </p>
+          {toggleError && (
+            <p className="mt-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
+              ⚠️ {toggleError}
+            </p>
+          )}
         </div>
         <button
           onClick={toggleBoard}
