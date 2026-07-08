@@ -102,7 +102,7 @@ export default function AdminDashboard() {
   if (loading)
     return (
       <main className="mx-auto max-w-4xl px-4 py-6 sm:px-5">
-        <div className="card h-40 animate-pulse" />
+        <div className="card h-40 animate-pulse bg-slate-100" />
       </main>
     );
 
@@ -170,7 +170,7 @@ export default function AdminDashboard() {
               />
             </div>
             {msg && (
-              <p className="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-300">
+              <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
                 {msg}
               </p>
             )}
@@ -185,7 +185,7 @@ export default function AdminDashboard() {
             Stations ({stations.length})
           </h2>
           {stations.length === 0 ? (
-            <p className="text-sm text-slate-400">
+            <p className="text-sm text-slate-500">
               No stations yet. Add your first task.
             </p>
           ) : (
@@ -193,22 +193,22 @@ export default function AdminDashboard() {
               {stations.map((s) => (
                 <div
                   key={s.id}
-                  className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-3"
+                  className="flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3"
                 >
                   <div className="min-w-0 flex-1">
-                    <div className="font-semibold">{s.name}</div>
+                    <div className="font-semibold text-slate-900">{s.name}</div>
                     {s.description && (
-                      <div className="text-sm text-slate-400">
+                      <div className="text-sm text-slate-500">
                         {s.description}
                       </div>
                     )}
-                    <div className="mt-1 inline-block rounded bg-white/5 px-1.5 py-0.5 font-mono text-xs text-fuchsia-300">
+                    <div className="mt-1 inline-block rounded bg-slate-200 px-1.5 py-0.5 font-mono text-xs text-fuchsia-600">
                       {s.code}
                     </div>
                   </div>
                   <button
                     onClick={() => remove(s.id)}
-                    className="btn-ghost px-2.5 py-1 text-xs text-red-300"
+                    className="btn-ghost px-2.5 py-1 text-xs text-red-600"
                   >
                     Delete
                   </button>
@@ -226,17 +226,17 @@ export default function AdminDashboard() {
           </h2>
           <button
             onClick={reset}
-            className="btn-ghost px-3 py-1.5 text-xs text-red-300"
+            className="btn-ghost px-3 py-1.5 text-xs text-red-600"
           >
             Reset all game data
           </button>
         </div>
         {teams.length === 0 ? (
-          <p className="text-sm text-slate-400">No teams registered yet.</p>
+          <p className="text-sm text-slate-500">No teams registered yet.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="text-xs uppercase tracking-wider text-slate-500">
+              <thead className="text-xs uppercase tracking-wider text-slate-400">
                 <tr>
                   <th className="py-2 pr-3">Team</th>
                   <th className="py-2 pr-3">Code</th>
@@ -248,15 +248,17 @@ export default function AdminDashboard() {
                 {[...board]
                   .sort((a, b) => a.rank - b.rank)
                   .map((r) => (
-                    <tr key={r.team_id} className="border-t border-white/5">
-                      <td className="py-2 pr-3 font-medium">{r.team_name}</td>
-                      <td className="py-2 pr-3 font-mono text-fuchsia-300">
+                    <tr key={r.team_id} className="border-t border-slate-100">
+                      <td className="py-2 pr-3 font-medium text-slate-900">
+                        {r.team_name}
+                      </td>
+                      <td className="py-2 pr-3 font-mono text-fuchsia-600">
                         {r.team_code}
                       </td>
-                      <td className="py-2 pr-3 text-right">
+                      <td className="py-2 pr-3 text-right text-slate-600">
                         {r.tasks_completed}
                       </td>
-                      <td className="py-2 pr-3 text-right font-bold text-amber-300">
+                      <td className="py-2 pr-3 text-right font-bold text-amber-600">
                         {r.total_points}
                       </td>
                     </tr>
@@ -273,8 +275,10 @@ export default function AdminDashboard() {
 function KPI({ label, value }: { label: string; value: number }) {
   return (
     <div className="card p-4 text-center">
-      <div className="font-display text-2xl font-black">{value}</div>
-      <div className="text-[11px] uppercase tracking-wider text-slate-400">
+      <div className="font-display text-2xl font-black text-slate-900">
+        {value}
+      </div>
+      <div className="text-[11px] uppercase tracking-wider text-slate-500">
         {label}
       </div>
     </div>

@@ -1,8 +1,18 @@
 # 🎮 The Big Game
 
-A live, real-time team-game app for events. Teams register and track their
-progress across many stations; advisor/station leaders tap a team and award a
-**1–10** score; everyone watches a live leaderboard update instantly.
+A live, real-time team-game app for events with a clean **light/white theme**.
+Teams register and track their progress across many stations; advisor/station
+leaders tap a team and award a **1–10** score; everyone watches a live
+leaderboard update instantly.
+
+**The two roles are fully separated** — there is no shared entrance. Each role
+gets its own dedicated link:
+
+- 🏃 **Teams** → `https://your-app.vercel.app/team`
+- 🎯 **Advisors** → `https://your-app.vercel.app/advisor`
+
+A team member can never reach the advisor section from their link (and vice
+versa). The home page (`/`) is just a neutral organizer hub (scoreboard + admin).
 
 Built with **Next.js (App Router)**, **Supabase** (Postgres + Realtime), deploys
 to **Vercel**, source on **GitHub**.
@@ -13,13 +23,17 @@ to **Vercel**, source on **GitHub**.
 
 | Route | Who | What it does |
 |-------|-----|--------------|
-| `/` | everyone | Landing page — pick Team / Advisor |
-| `/team` | team | Register a team + members, or rejoin with a code |
+| `/` | organizer | Neutral hub — links to scoreboard & admin only (no team/advisor split) |
+| `/team` | team | **Team portal entry** — register a team + members, or rejoin with a code |
 | `/team/[code]` | team | See all stations, your progress, points, rank, and the **public leaderboard** (live) |
-| `/advisor` | advisor | Enter your station code |
+| `/advisor` | advisor | **Advisor portal entry** — enter your station code |
 | `/advisor/[code]` | advisor | See all teams → tap a team → award a **1–10** score (live, can edit/undo) |
 | `/scoreboard` | big screen | Full-screen live rankings — perfect on a projector |
 | `/admin` | organizer | Create/edit/delete stations, view all teams, reset game data |
+
+> 🔒 **Separation:** the team portal only links within `/team/*`; the advisor
+> portal only links within `/advisor/*`. Hand out the two links above — neither
+> role can navigate to the other's screens.
 
 **Live updates** are powered by Supabase Realtime: when an advisor scores a team,
 every team's dashboard and the scoreboard refresh within a second.
@@ -92,10 +106,11 @@ Open http://localhost:3000.
 1. **Organizer** → `/admin` → enter `ADMIN_CODE` → **Add a station** for each
    task/advisor. Give each advisor their station **code** (shown next to each
    station). Stations sort by the *Order* field.
-2. **Advisors** → `/advisor` → type their code → they now see every team and a
-   1–10 scorer.
-3. **Teams** → `/team` → register name + members → get a team **code** → see all
-   stations, their progress, and their rank. Rejoin anytime with the code.
+2. **Advisors** → give them the **advisor link**: `https://your-app.vercel.app/advisor`
+   → they type their station code → they now see every team and a 1–10 scorer.
+3. **Teams** → give them the **team link**: `https://your-app.vercel.app/team`
+   → register name + members → get a team **code** → see all stations, their
+   progress, and their rank. Rejoin anytime with the code.
 4. (Optional) Put `/scoreboard` on a big screen for live hype.
 
 ---

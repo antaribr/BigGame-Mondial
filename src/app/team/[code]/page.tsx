@@ -67,17 +67,17 @@ export default function TeamDashboardPage() {
 
   if (loading)
     return (
-      <Shell>
+      <Shell back="/team" backLabel="← Switch team">
         <Skeleton />
       </Shell>
     );
 
   if (notFound || !team)
     return (
-      <Shell>
+      <Shell back="/team" backLabel="← Switch team">
         <div className="card p-8 text-center">
           <p className="text-lg font-semibold">Team not found</p>
-          <p className="mt-1 text-sm text-slate-400">
+          <p className="mt-1 text-sm text-slate-500">
             This team code doesn't exist.
           </p>
           <Link className="btn-primary mt-5" href="/team">
@@ -88,26 +88,26 @@ export default function TeamDashboardPage() {
     );
 
   return (
-    <Shell>
+    <Shell back="/team" backLabel="← Switch team">
       {/* Header */}
       <div className="card relative overflow-hidden p-6">
-        <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-gradient-to-br from-indigo-500/30 to-fuchsia-500/20 blur-3xl" />
+        <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-gradient-to-br from-indigo-400/25 to-fuchsia-400/20 blur-3xl" />
         <div className="relative flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">
-            <div className="text-xs uppercase tracking-widest text-fuchsia-300">
+            <div className="text-xs uppercase tracking-widest text-fuchsia-600">
               Your team
             </div>
             <h1 className="font-display text-3xl font-bold">{team.name}</h1>
-            <div className="mt-2 flex items-center gap-2 text-sm text-slate-400">
+            <div className="mt-2 flex items-center gap-2 text-sm text-slate-500">
               <span>Code:</span>
               <button
                 onClick={() => navigator.clipboard?.writeText(team.code)}
-                className="rounded-lg border border-white/10 bg-white/5 px-2 py-1 font-mono font-semibold tracking-widest text-amber-300"
+                className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 font-mono font-semibold tracking-widest text-amber-600"
                 title="Copy code"
               >
                 {team.code}
               </button>
-              <span className="text-xs">(tap to copy)</span>
+              <span className="text-xs text-slate-400">(tap to copy)</span>
             </div>
           </div>
           <div className="grid grid-cols-3 gap-2">
@@ -122,7 +122,7 @@ export default function TeamDashboardPage() {
       </div>
 
       {/* Tabs */}
-      <div className="mt-5 flex rounded-xl border border-white/10 bg-white/5 p-1">
+      <div className="mt-5 flex rounded-xl border border-slate-200 bg-slate-100 p-1">
         <TabButton active={tab === "tasks"} onClick={() => setTab("tasks")}>
           My Tasks
         </TabButton>
@@ -136,11 +136,11 @@ export default function TeamDashboardPage() {
           <MembersPanel teamId={team.id} members={members} onChange={load} />
 
           <div>
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-slate-400">
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-slate-500">
               All stations ({stations.length})
             </h2>
             {stations.length === 0 ? (
-              <div className="card p-6 text-center text-sm text-slate-400">
+              <div className="card p-6 text-center text-sm text-slate-500">
                 No stations yet. Ask the organizer to add tasks.
               </div>
             ) : (
@@ -151,24 +151,26 @@ export default function TeamDashboardPage() {
                     <div
                       key={s.id}
                       className={`card p-4 ${
-                        done ? "border-emerald-400/30 bg-emerald-400/[0.06]" : ""
+                        done ? "border-emerald-400 bg-emerald-50" : ""
                       }`}
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
-                          <div className="font-semibold">{s.name}</div>
+                          <div className="font-semibold text-slate-900">
+                            {s.name}
+                          </div>
                           {s.description && (
-                            <div className="mt-0.5 text-sm text-slate-400">
+                            <div className="mt-0.5 text-sm text-slate-500">
                               {s.description}
                             </div>
                           )}
                         </div>
                         {done ? (
-                          <span className="shrink-0 rounded-lg bg-emerald-500/15 px-2.5 py-1 text-sm font-bold text-emerald-300">
+                          <span className="shrink-0 rounded-lg bg-emerald-100 px-2.5 py-1 text-sm font-bold text-emerald-700">
                             +{done.score}
                           </span>
                         ) : (
-                          <span className="shrink-0 rounded-lg bg-white/5 px-2.5 py-1 text-xs text-slate-400">
+                          <span className="shrink-0 rounded-lg bg-slate-100 px-2.5 py-1 text-xs text-slate-500">
                             Pending
                           </span>
                         )}
@@ -218,14 +220,14 @@ function MembersPanel({
 
   return (
     <div className="card p-4">
-      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-slate-400">
+      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-slate-500">
         Members ({members.length})
       </h2>
       <div className="flex flex-wrap gap-2">
         {members.map((m) => (
           <span
             key={m.id}
-            className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 py-1 pl-3 pr-1.5 text-sm"
+            className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 py-1 pl-3 pr-1.5 text-sm text-slate-800"
           >
             {m.name}
             <button
@@ -233,7 +235,7 @@ function MembersPanel({
                 await removeMember(m.id);
                 onChange();
               }}
-              className="grid h-5 w-5 place-items-center rounded-full bg-white/10 text-xs hover:bg-red-500/30"
+              className="grid h-5 w-5 place-items-center rounded-full bg-slate-200 text-xs text-slate-600 hover:bg-red-100 hover:text-red-600"
               aria-label={`Remove ${m.name}`}
             >
               ✕
@@ -241,7 +243,7 @@ function MembersPanel({
           </span>
         ))}
         {members.length === 0 && (
-          <span className="text-sm text-slate-500">No members yet.</span>
+          <span className="text-sm text-slate-400">No members yet.</span>
         )}
       </div>
       <form onSubmit={add} className="mt-3 flex gap-2">

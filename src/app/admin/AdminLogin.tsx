@@ -28,7 +28,7 @@ export default function AdminLogin() {
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-5 py-6">
       <header className="mb-8 flex items-center justify-between">
         <Brand />
-        <Link href="/" className="text-sm text-slate-400 hover:text-slate-200">
+        <Link href="/" className="text-sm text-slate-500 hover:text-slate-900">
           ← Home
         </Link>
       </header>
@@ -36,7 +36,7 @@ export default function AdminLogin() {
       <form onSubmit={submit} className="card space-y-4 p-6">
         <div>
           <h1 className="font-display text-2xl font-bold">Admin login</h1>
-          <p className="mt-1 text-sm text-slate-400">
+          <p className="mt-1 text-sm text-slate-500">
             Enter the organizer admin code.
           </p>
         </div>
@@ -48,7 +48,7 @@ export default function AdminLogin() {
           maxLength={40}
         />
         {error && (
-          <p className="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-300">
+          <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
             {error}
           </p>
         )}

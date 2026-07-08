@@ -18,12 +18,16 @@ export default function TeamEntryPage() {
     <main className="mx-auto flex min-h-screen max-w-xl flex-col px-5 py-6">
       <header className="mb-8 flex items-center justify-between">
         <Brand />
-        <Link href="/" className="text-sm text-slate-400 hover:text-slate-200">
-          ← Home
+        {/* Team portal — no link to advisor or the shared home. */}
+        <Link
+          href="/scoreboard"
+          className="text-sm text-slate-500 hover:text-slate-900"
+        >
+          📊 Scoreboard
         </Link>
       </header>
 
-      <div className="flex rounded-xl border border-white/10 bg-white/5 p-1">
+      <div className="flex rounded-xl border border-slate-200 bg-slate-100 p-1">
         <TabButton active={tab === "register"} onClick={() => setTab("register")}>
           Register a team
         </TabButton>
@@ -39,10 +43,7 @@ export default function TeamEntryPage() {
             key="register"
           />
         ) : (
-          <JoinForm
-            onDone={(code) => router.push(`/team/${code}`)}
-            key="join"
-          />
+          <JoinForm onDone={(code) => router.push(`/team/${code}`)} key="join" />
         )}
       </div>
     </main>
@@ -76,7 +77,7 @@ function RegisterForm({ onDone }: { onDone: (code: string) => void }) {
   return (
     <form onSubmit={submit} className="card space-y-5 p-5">
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-slate-300">
+        <label className="mb-1.5 block text-sm font-medium text-slate-700">
           Team name
         </label>
         <input
@@ -90,10 +91,10 @@ function RegisterForm({ onDone }: { onDone: (code: string) => void }) {
 
       <div>
         <div className="mb-1.5 flex items-center justify-between">
-          <label className="text-sm font-medium text-slate-300">
+          <label className="text-sm font-medium text-slate-700">
             Team members
           </label>
-          <span className="text-xs text-slate-500">
+          <span className="text-xs text-slate-400">
             {members.filter((m) => m.trim()).length} added
           </span>
         </div>
@@ -125,14 +126,14 @@ function RegisterForm({ onDone }: { onDone: (code: string) => void }) {
         <button
           type="button"
           onClick={() => setMembers((s) => [...s, ""])}
-          className="mt-2 text-sm font-semibold text-fuchsia-300 hover:text-fuchsia-200"
+          className="mt-2 text-sm font-semibold text-fuchsia-600 hover:text-fuchsia-700"
         >
           + Add member
         </button>
       </div>
 
       {error && (
-        <p className="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-300">
+        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
           {error}
         </p>
       )}
@@ -140,7 +141,7 @@ function RegisterForm({ onDone }: { onDone: (code: string) => void }) {
       <button className="btn-primary w-full" disabled={loading}>
         {loading ? "Creating…" : "Create team & play →"}
       </button>
-      <p className="text-center text-xs text-slate-500">
+      <p className="text-center text-xs text-slate-400">
         You'll get a team code to rejoin later.
       </p>
     </form>
@@ -175,7 +176,7 @@ function JoinForm({ onDone }: { onDone: (code: string) => void }) {
   return (
     <form onSubmit={submit} className="card space-y-4 p-5">
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-slate-300">
+        <label className="mb-1.5 block text-sm font-medium text-slate-700">
           Team code
         </label>
         <input
@@ -187,7 +188,7 @@ function JoinForm({ onDone }: { onDone: (code: string) => void }) {
         />
       </div>
       {error && (
-        <p className="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-300">
+        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
           {error}
         </p>
       )}

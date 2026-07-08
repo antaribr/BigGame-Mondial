@@ -102,14 +102,14 @@ export default function AdvisorPage() {
 
   if (loading)
     return (
-      <Shell>
+      <Shell back="/advisor" backLabel="← Switch station">
         <Skeleton />
       </Shell>
     );
 
   if (notFound || !station)
     return (
-      <Shell>
+      <Shell back="/advisor" backLabel="← Switch station">
         <div className="card p-8 text-center">
           <p className="text-lg font-semibold">Station not found</p>
           <Link className="btn-primary mt-5" href="/advisor">
@@ -120,22 +120,22 @@ export default function AdvisorPage() {
     );
 
   return (
-    <Shell>
+    <Shell back="/advisor" backLabel="← Switch station">
       {/* Header */}
       <div className="card relative overflow-hidden p-6">
-        <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-gradient-to-br from-fuchsia-500/30 to-amber-400/20 blur-3xl" />
+        <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-gradient-to-br from-fuchsia-400/25 to-amber-400/20 blur-3xl" />
         <div className="relative">
-          <div className="text-xs uppercase tracking-widest text-amber-300">
+          <div className="text-xs uppercase tracking-widest text-amber-600">
             Advisor station
           </div>
           <h1 className="font-display text-3xl font-bold">{station.name}</h1>
           {station.description && (
-            <p className="mt-1 max-w-prose text-sm text-slate-300">
+            <p className="mt-1 max-w-prose text-sm text-slate-600">
               {station.description}
             </p>
           )}
           <div className="mt-3 flex flex-wrap items-center gap-3">
-            <div className="rounded-lg border border-white/10 bg-white/5 px-2 py-1 font-mono text-sm tracking-widest text-fuchsia-300">
+            <div className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 font-mono text-sm tracking-widest text-fuchsia-600">
               {station.code}
             </div>
             <Stat label="Scored" value={`${doneCount}/${teams.length}`} />
@@ -156,7 +156,7 @@ export default function AdvisorPage() {
       {/* Teams */}
       <div className="mt-4 space-y-2">
         {filtered.length === 0 && (
-          <div className="card p-6 text-center text-sm text-slate-400">
+          <div className="card p-6 text-center text-sm text-slate-500">
             No teams found.
           </div>
         )}
@@ -167,19 +167,21 @@ export default function AdvisorPage() {
             <div
               key={t.id}
               className={`card overflow-hidden ${
-                c ? "border-emerald-400/30" : ""
+                c ? "border-emerald-400" : ""
               }`}
             >
               <div className="flex items-center gap-3 p-3.5">
                 <div className="min-w-0 flex-1">
-                  <div className="truncate font-semibold">{t.name}</div>
-                  <div className="text-xs text-slate-400">
+                  <div className="truncate font-semibold text-slate-900">
+                    {t.name}
+                  </div>
+                  <div className="text-xs text-slate-500">
                     {memberCounts[t.id] ?? 0} members · {t.code}
                   </div>
                 </div>
                 {c ? (
                   <div className="flex items-center gap-2">
-                    <span className="rounded-lg bg-emerald-500/15 px-3 py-1.5 font-bold text-emerald-300">
+                    <span className="rounded-lg bg-emerald-100 px-3 py-1.5 font-bold text-emerald-700">
                       {c.score}/10
                     </span>
                     <button
@@ -191,7 +193,7 @@ export default function AdvisorPage() {
                     <button
                       onClick={() => undo(c)}
                       disabled={busyId === t.id}
-                      className="btn-ghost px-3 py-1.5 text-sm text-red-300"
+                      className="btn-ghost px-3 py-1.5 text-sm text-red-600"
                     >
                       Undo
                     </button>
@@ -206,8 +208,8 @@ export default function AdvisorPage() {
                 )}
               </div>
               {open && (
-                <div className="border-t border-white/10 bg-black/20 p-3">
-                  <div className="mb-2 text-xs uppercase tracking-wider text-slate-400">
+                <div className="border-t border-slate-200 bg-slate-50 p-3">
+                  <div className="mb-2 text-xs uppercase tracking-wider text-slate-500">
                     Tap a score (1–10)
                   </div>
                   <div className="grid grid-cols-5 gap-2 sm:grid-cols-10">
@@ -216,9 +218,9 @@ export default function AdvisorPage() {
                         key={n}
                         onClick={() => score(t, n)}
                         disabled={busyId === t.id}
-                        className="rounded-lg py-2.5 font-bold text-white transition hover:brightness-110 disabled:opacity-50"
+                        className="rounded-lg py-2.5 font-bold text-white shadow-sm transition hover:brightness-110 disabled:opacity-50"
                         style={{
-                          background: `hsl(${((n - 1) / 9) * 130}, 70%, 45%)`,
+                          background: `hsl(${((n - 1) / 9) * 130}, 70%, 42%)`,
                         }}
                       >
                         {n}

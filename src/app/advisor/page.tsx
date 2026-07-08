@@ -3,7 +3,6 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { Brand } from "@/components/Brand";
 import { fetchStationByCode } from "@/lib/api";
 
@@ -39,16 +38,17 @@ export default function AdvisorEntryPage() {
     <main className="mx-auto flex min-h-screen max-w-xl flex-col px-5 py-6">
       <header className="mb-8 flex items-center justify-between">
         <Brand />
-        <Link href="/" className="text-sm text-slate-400 hover:text-slate-200">
-          ← Home
-        </Link>
+        {/* Advisor portal — no link to team or the shared home. */}
+        <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-500 shadow-sm">
+          🎯 Advisor portal
+        </span>
       </header>
 
       <div className="card space-y-4 p-6">
         <div className="text-center">
           <div className="text-4xl">🎯</div>
           <h1 className="mt-2 font-display text-2xl font-bold">Advisor station</h1>
-          <p className="mt-1 text-sm text-slate-400">
+          <p className="mt-1 text-sm text-slate-500">
             Enter your station code to start scoring teams.
           </p>
         </div>
@@ -61,7 +61,7 @@ export default function AdvisorEntryPage() {
             maxLength={8}
           />
           {error && (
-            <p className="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-300">
+            <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
               {error}
             </p>
           )}

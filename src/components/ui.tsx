@@ -9,9 +9,11 @@ import type { LeaderboardRow } from "@/lib/types";
 export function Shell({
   children,
   back = "/",
+  backLabel = "← Back",
 }: {
   children: ReactNode;
   back?: string;
+  backLabel?: string;
 }) {
   return (
     <main className="mx-auto flex min-h-screen max-w-3xl flex-col px-4 py-5 sm:px-5">
@@ -19,9 +21,9 @@ export function Shell({
         <Brand />
         <Link
           href={back}
-          className="text-sm text-slate-400 hover:text-slate-200"
+          className="text-sm text-slate-500 hover:text-slate-900"
         >
-          ← Home
+          {backLabel}
         </Link>
       </header>
       {children}
@@ -31,9 +33,11 @@ export function Shell({
 
 export function Stat({ label, value }: { label: string; value: ReactNode }) {
   return (
-    <div className="min-w-[72px] rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-center">
-      <div className="font-display text-xl font-bold leading-none">{value}</div>
-      <div className="mt-1 text-[10px] uppercase tracking-wider text-slate-400">
+    <div className="min-w-[72px] rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-center">
+      <div className="font-display text-xl font-bold leading-none text-slate-900">
+        {value}
+      </div>
+      <div className="mt-1 text-[10px] uppercase tracking-wider text-slate-500">
         {label}
       </div>
     </div>
@@ -54,8 +58,8 @@ export function TabButton({
       onClick={onClick}
       className={`flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition ${
         active
-          ? "bg-white/10 text-white"
-          : "text-slate-400 hover:text-slate-200"
+          ? "bg-white text-slate-900 shadow-sm"
+          : "text-slate-500 hover:text-slate-900"
       }`}
     >
       {children}
@@ -66,9 +70,9 @@ export function TabButton({
 export function Skeleton() {
   return (
     <div className="space-y-4">
-      <div className="card h-28 animate-pulse" />
-      <div className="card h-10 animate-pulse" />
-      <div className="card h-40 animate-pulse" />
+      <div className="card h-28 animate-pulse bg-slate-100" />
+      <div className="card h-10 animate-pulse bg-slate-100" />
+      <div className="card h-40 animate-pulse bg-slate-100" />
     </div>
   );
 }
@@ -86,7 +90,7 @@ export function LeaderboardList({
 }) {
   if (rows.length === 0)
     return (
-      <div className={`card p-6 text-center text-sm text-slate-400 ${className}`}>
+      <div className={`card p-6 text-center text-sm text-slate-500 ${className}`}>
         No teams yet.
       </div>
     );
@@ -100,29 +104,29 @@ export function LeaderboardList({
             key={r.team_id}
             className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 ${
               me
-                ? "border-fuchsia-400/40 bg-fuchsia-500/10"
-                : "border-white/10 bg-white/[0.03]"
+                ? "border-fuchsia-400 bg-fuchsia-50"
+                : "border-slate-200 bg-white"
             }`}
           >
-            <div className="w-7 text-center font-display text-lg font-bold text-slate-300">
+            <div className="w-7 text-center font-display text-lg font-bold text-slate-500">
               {r.rank <= 3 ? MEDALS[r.rank - 1] : r.rank}
             </div>
             <div className="min-w-0 flex-1">
-              <div className="truncate font-semibold">
+              <div className="truncate font-semibold text-slate-900">
                 {r.team_name}
                 {me && (
-                  <span className="ml-2 text-xs text-fuchsia-300">you</span>
+                  <span className="ml-2 text-xs text-fuchsia-600">you</span>
                 )}
               </div>
-              <div className="text-xs text-slate-400">
+              <div className="text-xs text-slate-500">
                 {r.tasks_completed} tasks done
               </div>
             </div>
             <div className="text-right">
-              <div className="font-display text-lg font-bold text-amber-300">
+              <div className="font-display text-lg font-bold text-amber-600">
                 {r.total_points}
               </div>
-              <div className="text-[10px] uppercase tracking-wider text-slate-500">
+              <div className="text-[10px] uppercase tracking-wider text-slate-400">
                 pts
               </div>
             </div>

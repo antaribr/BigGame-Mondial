@@ -29,25 +29,25 @@ export default function ScoreboardPage() {
     <main className="mx-auto flex min-h-screen max-w-5xl flex-col px-4 py-6">
       <header className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <span className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-indigo-500 via-fuchsia-500 to-amber-400 text-lg font-black text-white">
+          <span className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-indigo-600 via-fuchsia-600 to-amber-500 text-lg font-black text-white">
             B
           </span>
           <div>
-            <div className="font-display text-xl font-bold leading-none">
+            <div className="font-display text-xl font-bold leading-none text-slate-900">
               Live Scoreboard
             </div>
-            <div className="text-xs text-slate-400">The Big Game</div>
+            <div className="text-xs text-slate-500">The Big Game</div>
           </div>
         </div>
-        <Link href="/" className="text-sm text-slate-400 hover:text-slate-200">
+        <Link href="/" className="text-sm text-slate-500 hover:text-slate-900">
           ← Home
         </Link>
       </header>
 
       {loading ? (
-        <div className="card h-64 animate-pulse" />
+        <div className="card h-64 animate-pulse bg-slate-100" />
       ) : rows.length === 0 ? (
-        <div className="card p-10 text-center text-slate-400">
+        <div className="card p-10 text-center text-slate-500">
           No scores yet. Let the games begin! 🎮
         </div>
       ) : (
@@ -57,17 +57,17 @@ export default function ScoreboardPage() {
               <div
                 key={r.team_id}
                 className={`card relative overflow-hidden p-5 text-center ${
-                  i === 0 ? "border-amber-300/40 sm:-translate-y-2" : ""
+                  i === 0 ? "border-amber-400 sm:-translate-y-2" : ""
                 }`}
               >
                 <div className="text-4xl">{MEDALS[i]}</div>
-                <div className="mt-2 truncate font-display text-xl font-bold">
+                <div className="mt-2 truncate font-display text-xl font-bold text-slate-900">
                   {r.team_name}
                 </div>
-                <div className="mt-1 font-display text-3xl font-black text-amber-300">
+                <div className="mt-1 font-display text-3xl font-black text-amber-600">
                   {r.total_points}
                 </div>
-                <div className="text-xs uppercase tracking-wider text-slate-400">
+                <div className="text-xs uppercase tracking-wider text-slate-500">
                   {r.tasks_completed} tasks · rank #{r.rank}
                 </div>
               </div>
@@ -78,18 +78,18 @@ export default function ScoreboardPage() {
             {rest.map((r) => (
               <div
                 key={r.team_id}
-                className="flex items-center gap-4 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3"
+                className="flex items-center gap-4 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm"
               >
                 <div className="w-8 text-center font-display text-lg font-bold text-slate-400">
                   {r.rank}
                 </div>
-                <div className="min-w-0 flex-1 truncate font-semibold">
+                <div className="min-w-0 flex-1 truncate font-semibold text-slate-900">
                   {r.team_name}
                 </div>
-                <div className="text-sm text-slate-400">
+                <div className="text-sm text-slate-500">
                   {r.tasks_completed} tasks
                 </div>
-                <div className="font-display text-xl font-bold text-amber-300">
+                <div className="font-display text-xl font-bold text-amber-600">
                   {r.total_points}
                 </div>
               </div>

@@ -12,14 +12,6 @@ const config: Config = {
           "sans-serif",
         ],
       },
-      colors: {
-        ink: {
-          950: "#070811",
-          900: "#0b0d1a",
-          800: "#12152a",
-          700: "#1b1f3b",
-        },
-      },
       keyframes: {
         "fade-in": {
           "0%": { opacity: "0", transform: "translateY(6px)" },
