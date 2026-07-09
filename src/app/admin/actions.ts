@@ -56,16 +56,23 @@ export async function createStation(input: {
   description?: string;
   code?: string;
   sort_order?: number;
+  max_score?: number;
 }): Promise<Result> {
   if (!(await isAdmin())) return { ok: false, error: "Unauthorized" };
   try {
     const supa = adminClient();
     const code = (input.code?.trim() || genCode(5)).toUpperCase();
+
+    // Clamp max_score to 0–100, default 10.
+    const raw = input.max_score ?? 10;
+    const max_score = Math.max(0, Math.min(100, Math.trunc(raw)));
+
     const { error } = await supa.from("stations").insert({
       name: input.name.trim(),
       description: input.description?.trim() || null,
       code,
       sort_order: input.sort_order ?? 0,
+      max_score,
     });
     if (error) return { ok: false, error: error.message };
     revalidatePath("/admin");
@@ -145,8 +152,7 @@ export async function setLeaderboardPublic(value: boolean): Promise<Result> {
     const supa = adminClient();
     const { error } = await supa
       .from("settings")
-      .update({ leaderboard_public: value })
-      .eq("id", 1);
+      .upsert({ id: 1, leaderboard_public: value });
     if (error) return { ok: false, error: error.message };
     revalidatePath("/admin");
     return { ok: true };

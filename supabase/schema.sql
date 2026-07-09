@@ -30,6 +30,7 @@ create table if not exists public.stations (
   description text,
   code        text not null unique,            -- advisor station code
   sort_order  int  not null default 0,
+  max_score   int  not null default 10 check (max_score between 0 and 100),
   created_at  timestamptz not null default now()
 );
 
@@ -37,7 +38,7 @@ create table if not exists public.completions (
   id          uuid primary key default gen_random_uuid(),
   team_id     uuid not null references public.teams(id)    on delete cascade,
   station_id  uuid not null references public.stations(id) on delete cascade,
-  score       int  not null check (score between 1 and 10),
+  score       int  not null check (score >= 0),
   created_at  timestamptz not null default now(),
   unique (team_id, station_id)                 -- one score per team/station
 );
@@ -134,8 +135,9 @@ begin
     raise exception 'Invalid station code';
   end if;
 
-  if p_score is null or p_score < 1 or p_score > 10 then
-    raise exception 'Score must be between 1 and 10';
+  if p_score is null or p_score < 0 or p_score > v_station.max_score then
+    raise exception 'Score % is not allowed for this station (allowed: 0 to %)',
+      p_score, v_station.max_score;
   end if;
 
   insert into public.completions (team_id, station_id, score)

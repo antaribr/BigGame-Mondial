@@ -219,22 +219,29 @@ export default function AdvisorPage() {
               {open && (
                 <div className="border-t border-slate-200 bg-slate-50 p-3">
                   <div className="mb-2 text-xs uppercase tracking-wider text-slate-500">
-                    Tap a score (1–10)
+                    Tap a score (0 – {station.max_score})
                   </div>
                   <div className="grid grid-cols-5 gap-2">
-                    {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
-                      <button
-                        key={n}
-                        onClick={() => score(t, n)}
-                        disabled={busyId === t.id}
-                        className="grid h-12 place-items-center rounded-lg text-base font-bold text-white shadow-sm transition hover:brightness-110 active:scale-95 disabled:opacity-50"
-                        style={{
-                          background: `hsl(${((n - 1) / 9) * 130}, 70%, 42%)`,
-                        }}
-                      >
-                        {n}
-                      </button>
-                    ))}
+                    {Array.from(
+                      { length: station.max_score + 1 },
+                      (_, i) => i,
+                    ).map((n) => {
+                      const hue =
+                        station.max_score > 0
+                          ? (n / station.max_score) * 130
+                          : 65;
+                      return (
+                        <button
+                          key={n}
+                          onClick={() => score(t, n)}
+                          disabled={busyId === t.id}
+                          className="grid h-12 place-items-center rounded-lg text-base font-bold text-white shadow-sm transition hover:brightness-110 active:scale-95 disabled:opacity-50"
+                          style={{ background: `hsl(${hue}, 70%, 42%)` }}
+                        >
+                          {n}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               )}

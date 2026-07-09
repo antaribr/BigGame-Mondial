@@ -18,6 +18,7 @@ export type Station = {
   description: string | null;
   code: string;
   sort_order: number;
+  max_score: number;
   created_at: string;
 };
 

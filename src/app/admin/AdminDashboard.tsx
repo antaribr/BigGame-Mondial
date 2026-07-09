@@ -49,10 +49,23 @@ export default function AdminDashboard() {
 
   const boardOpen = settings.leaderboard_public;
 
+  const [toggleError, setToggleError] = useState<string | null>(null);
+
   async function toggleBoard() {
+    setToggleError(null);
     const next = !boardOpen;
     setSettings((s) => ({ ...s, leaderboard_public: next })); // optimistic
-    await setLeaderboardPublic(next);
+    const res = await setLeaderboardPublic(next);
+    if (!res.ok) {
+      // Revert on failure and show why — never silently flip back.
+      setSettings((s) => ({ ...s, leaderboard_public: !next }));
+      setToggleError(
+        res.error?.includes("Could not find the table")
+          ? "The settings table is missing. Run migration_settings.sql in Supabase."
+          : res.error ?? "Could not change leaderboard visibility.",
+      );
+      return;
+    }
     await load();
   }
 
@@ -60,6 +73,7 @@ export default function AdminDashboard() {
   const [desc, setDesc] = useState("");
   const [code, setCode] = useState("");
   const [order, setOrder] = useState("0");
+  const [maxScore, setMaxScore] = useState("10");
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
 
@@ -76,6 +90,7 @@ export default function AdminDashboard() {
       description: desc,
       code,
       sort_order: Number(order) || 0,
+      max_score: Number(maxScore) || 10,
     });
     setSaving(false);
     if (res.ok) {
@@ -83,6 +98,7 @@ export default function AdminDashboard() {
       setDesc("");
       setCode("");
       setOrder("0");
+      setMaxScore("10");
       await load();
     } else {
       setMsg(res.error ?? "Could not add station.");
@@ -177,6 +193,11 @@ export default function AdminDashboard() {
               ? "Teams can see the rankings & everyone's points."
               : "Teams can only see their own points."}
           </p>
+          {toggleError && (
+            <p className="mt-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
+              ⚠️ {toggleError}
+            </p>
+          )}
         </div>
         <button
           onClick={toggleBoard}
@@ -222,6 +243,19 @@ export default function AdminDashboard() {
                 onChange={(e) => setOrder(e.target.value)}
               />
             </div>
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-slate-700">
+                Max points (advisor gives 0 → this number)
+              </label>
+              <input
+                className="input w-32"
+                type="number"
+                min={1}
+                max={100}
+                value={maxScore}
+                onChange={(e) => setMaxScore(e.target.value)}
+              />
+            </div>
             {msg && (
               <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
                 {msg}
@@ -255,8 +289,13 @@ export default function AdminDashboard() {
                         {s.description}
                       </div>
                     )}
-                    <div className="mt-1 inline-block rounded bg-slate-200 px-1.5 py-0.5 font-mono text-xs text-fuchsia-600">
-                      {s.code}
+                    <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                      <span className="inline-block rounded bg-slate-200 px-1.5 py-0.5 font-mono text-xs text-fuchsia-600">
+                        {s.code}
+                      </span>
+                      <span className="inline-block rounded bg-indigo-100 px-1.5 py-0.5 text-xs font-semibold text-indigo-700">
+                        🎯 max {s.max_score} pts
+                      </span>
                     </div>
                   </div>
                   <button

@@ -186,6 +186,10 @@ export default function TeamDashboardPage() {
               <div className="grid gap-3 sm:grid-cols-2">
                 {stations.map((s) => {
                   const done = byStation.get(s.id);
+                  const max =
+                    typeof s.max_score === "number" && s.max_score > 0
+                      ? s.max_score
+                      : 10;
                   return (
                     <div
                       key={s.id}
@@ -203,6 +207,9 @@ export default function TeamDashboardPage() {
                               {s.description}
                             </div>
                           )}
+                          <span className="mt-2 inline-block rounded-md bg-indigo-50 px-2 py-0.5 text-xs font-semibold text-indigo-700">
+                            🎯 max of {max} pts
+                          </span>
                         </div>
                         {done ? (
                           <span className="shrink-0 rounded-lg bg-emerald-100 px-2.5 py-1 text-sm font-bold text-emerald-700">
