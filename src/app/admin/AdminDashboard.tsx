@@ -25,21 +25,44 @@ export default function AdminDashboard() {
   const [members, setMembers] = useState<Member[]>([]);
   const [settings, setSettings] = useState<Settings>({ id: 1, leaderboard_public: true });
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    const [s, t, b, m, stg] = await Promise.all([
-      fetchStations(),
-      fetchTeams(),
-      fetchLeaderboard(),
-      fetchAllMembers(),
-      fetchSettings(),
-    ]);
-    setStations(s);
-    setTeams(t);
-    setBoard(b);
-    setMembers(m);
-    setSettings(stg);
-    setLoading(false);
+    setLoading(true);
+    setLoadError(null);
+    // Fetch each call independently so we can report the exact one that fails.
+    const tasks: [string, Promise<unknown>][] = [
+      ["stations", fetchStations()],
+      ["teams", fetchTeams()],
+      ["leaderboard", fetchLeaderboard()],
+      ["members", fetchAllMembers()],
+      ["settings", fetchSettings()],
+    ];
+    try {
+      const results = await Promise.all(
+        tasks.map(async ([label, p]) => {
+          try {
+            return [label, await p] as const;
+          } catch (e) {
+            throw new Error(
+              `${label}: ${e instanceof Error ? e.message : String(e)}`,
+            );
+          }
+        }),
+      );
+      for (const [label, val] of results) {
+        if (label === "stations") setStations(val as Station[]);
+        if (label === "teams") setTeams(val as Team[]);
+        if (label === "leaderboard") setBoard(val as LeaderboardRow[]);
+        if (label === "members") setMembers(val as Member[]);
+        if (label === "settings") setSettings(val as Settings);
+      }
+      setLoading(false);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      setLoadError(msg);
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -136,6 +159,39 @@ export default function AdminDashboard() {
     return (
       <main className="mx-auto max-w-4xl px-4 py-6 sm:px-5">
         <div className="card h-40 animate-pulse bg-slate-100" />
+      </main>
+    );
+
+  if (loadError)
+    return (
+      <main className="mx-auto max-w-4xl px-4 py-6 sm:px-5">
+        <header className="mb-6 flex items-center justify-between">
+          <Brand home="/admin" />
+          <button onClick={logout} className="btn-ghost text-sm">
+            Log out
+          </button>
+        </header>
+        <div className="card border-red-300 p-6">
+          <p className="font-display text-lg font-bold text-red-600">
+            ⚠️ Couldn't load admin data
+          </p>
+          <p className="mt-2 rounded-lg bg-red-50 px-3 py-2 font-mono text-sm break-all text-red-700">
+            {loadError}
+          </p>
+          <p className="mt-3 text-sm text-slate-600">
+            If this mentions <code className="rounded bg-slate-100 px-1">scores</code>{" "}
+            or <code className="rounded bg-slate-100 px-1">max_score</code> —
+            make sure the <b>latest code is deployed</b> (push to GitHub so
+            Vercel rebuilds) and run{" "}
+            <code className="rounded bg-slate-100 px-1">
+              migration_station_max_score.sql
+            </code>{" "}
+            in Supabase.
+          </p>
+          <button onClick={() => load()} className="btn-primary mt-4">
+            Try again
+          </button>
+        </div>
       </main>
     );
 
