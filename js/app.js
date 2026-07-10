@@ -50,16 +50,32 @@ async function renderRoute() {
   let match;
   let page;
   let params = {};
+  const query = new URLSearchParams(window.location.search);
 
-  if (path === "/team") page = renderTeamEntry;
-  else if ((match = path.match(/^\/team\/([^/]+)\/qr-form$/))) {
+  // Query-string routes work on every static host without rewrite rules.
+  if (path === "/team/qr-form") {
+    page = renderQuiz;
+    params = { stationCode: query.get("station") || "QRQUIZ" };
+  } else if (path === "/team") {
+    const code = query.get("code");
+    if (code) {
+      page = renderTeamDashboard;
+      params = { code };
+    } else page = renderTeamEntry;
+  } else if ((match = path.match(/^\/team\/([^/]+)\/qr-form$/))) {
+    // Backward compatibility with the original clean URL.
     page = renderQuiz;
     params = { stationCode: safeDecode(match[1]) };
   } else if ((match = path.match(/^\/team\/([^/]+)$/))) {
     page = renderTeamDashboard;
     params = { code: safeDecode(match[1]) };
-  } else if (path === "/advisor") page = renderAdvisorEntry;
-  else if ((match = path.match(/^\/advisor\/([^/]+)$/))) {
+  } else if (path === "/advisor") {
+    const code = query.get("code");
+    if (code) {
+      page = renderAdvisorDashboard;
+      params = { code };
+    } else page = renderAdvisorEntry;
+  } else if ((match = path.match(/^\/advisor\/([^/]+)$/))) {
     page = renderAdvisorDashboard;
     params = { code: safeDecode(match[1]) };
   } else if (path === "/scoreboard") page = renderScoreboard;

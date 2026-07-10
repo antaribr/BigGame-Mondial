@@ -11,7 +11,7 @@ export async function renderTeamEntry(root, { navigate }) {
       <header class="header"><div class="header-inner" style="justify-content:center">${brand()}</div></header>
       <main class="main"><div class="container narrow stack">
         <div class="center"><p class="eyebrow">Team portal</p><h1 class="page-title">Join the game</h1><p class="muted">Create a team or use your team code to rejoin.</p></div>
-        ${savedCode ? `<a href="/team/${escapeHTML(savedCode)}" data-link class="alert alert-info" style="display:block;text-decoration:none"><strong>Resume saved team</strong><br><span class="small mono">${escapeHTML(savedCode)}</span> →</a>` : ""}
+        ${savedCode ? `<a href="/team?code=${encodeURIComponent(savedCode)}" data-link class="alert alert-info" style="display:block;text-decoration:none"><strong>Resume saved team</strong><br><span class="small mono">${escapeHTML(savedCode)}</span> →</a>` : ""}
         <div class="tabs" role="tablist" aria-label="Team access">
           <button id="register-tab" class="tab active" type="button" role="tab" aria-selected="true">Register a team</button>
           <button id="join-tab" class="tab" type="button" role="tab" aria-selected="false">I have a code</button>
@@ -88,7 +88,7 @@ export async function renderTeamEntry(root, { navigate }) {
         const members = Array.from(panel.querySelectorAll(".member-input"), (input) => input.value);
         const team = await registerTeam(name, members);
         localStorage.setItem(TEAM_KEY, team.code);
-        navigate(`/team/${team.code}`);
+        navigate(`/team?code=${encodeURIComponent(team.code)}`);
       } catch (error) {
         showFormMessage(message, error.message || "Could not create the team.");
         setButtonBusy(button, false);
@@ -115,7 +115,7 @@ export async function renderTeamEntry(root, { navigate }) {
         const team = await fetchTeamByCode(input.value);
         if (!team) throw new Error("No team was found with that code.");
         localStorage.setItem(TEAM_KEY, team.code);
-        navigate(`/team/${team.code}`);
+        navigate(`/team?code=${encodeURIComponent(team.code)}`);
       } catch (error) {
         showFormMessage(message, error.message || "Could not look up the team.");
         setButtonBusy(button, false);

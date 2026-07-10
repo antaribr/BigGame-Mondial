@@ -18,13 +18,13 @@ Supabase is retained for shared data and live updates. Two small Supabase Edge F
 | Route | Purpose |
 | --- | --- |
 | `/team` | Register or rejoin a team |
-| `/team/TEAMCODE` | Team dashboard |
+| `/team?code=TEAMCODE` | Team dashboard |
 | `/advisor` | Enter a station code |
-| `/advisor/STATIONCODE` | Advisor scoring screen |
+| `/advisor?code=STATIONCODE` | Advisor scoring screen |
 | `/scoreboard` | Full-screen live rankings |
 | `/admin` | Organizer admin panel |
 | `/admin/quiz` | Questions and quiz attempts |
-| `/team/QRQUIZ/qr-form` | QR quiz |
+| `/team/qr-form?station=QRQUIZ` | QR quiz |
 
 ## Project structure
 

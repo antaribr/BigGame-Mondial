@@ -194,7 +194,7 @@ export async function renderAdmin(root, context) {
     }
 
     function showQRModal() {
-      const url = `${window.location.origin}/team/QRQUIZ/qr-form`;
+      const url = `${window.location.origin}/team/qr-form?station=QRQUIZ`;
       const backdrop = document.createElement("div");
       backdrop.className = "modal-backdrop";
       backdrop.id = "qr-modal";
