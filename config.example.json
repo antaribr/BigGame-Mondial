@@ -1,0 +1,11 @@
+{
+  "supabaseUrl": "https://abcdefghijk.supabase.co",
+  "supabaseAnonKey": "your-public-anon-key",
+  "adminFunction": "admin-api",
+  "quizFunction": "quiz-api",
+  "quiz": {
+    "questionCount": 20,
+    "seconds": 20,
+    "pointsPerCorrect": 0.5
+  }
+}
