@@ -61,9 +61,24 @@ _redirects                 Netlify clean-route rewrites
 
 The migration changes completion scores from integer to numeric so the quiz can safely award `0.5` points.
 
-## 2. Set `config.json`
+## 2. Connect the public browser configuration
 
-In Supabase, open **Project Settings → API** and copy the project URL and public anon key. Put only those public values in `config.json`:
+In Supabase, open **Project Settings → API** and copy the project URL and public anon/publishable key.
+
+### Vercel (recommended)
+
+Add these in **Vercel project → Settings → Environment Variables**:
+
+```text
+NEXT_PUBLIC_SUPABASE_URL=https://YOUR-PROJECT.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR_PUBLIC_ANON_KEY
+```
+
+`api/config.js` safely exposes those two public values to the browser. Add them to Production, Preview, and Development as needed, then redeploy.
+
+### Other hosts/local development
+
+Put the same public values directly in `config.json`:
 
 ```json
 {
@@ -79,7 +94,7 @@ In Supabase, open **Project Settings → API** and copy the project URL and publ
 }
 ```
 
-> **Never** place `SUPABASE_SERVICE_ROLE_KEY`, `ADMIN_CODE`, or `ADMIN_SESSION_SECRET` in `config.json` or any browser file.
+> **Never** expose `SUPABASE_SERVICE_ROLE_KEY`, `ADMIN_CODE`, or `ADMIN_SESSION_SECRET` through `config.json` or `api/config.js`.
 
 ## 3. Deploy the Edge Functions
 
@@ -120,13 +135,19 @@ Keep `config.json` quiz values aligned with the Edge Function secrets. The funct
 
 ## 4. Run locally
 
-No npm packages or build are required. Serve the directory over HTTP:
+No npm packages or build are required. Start the included clean-route development server:
 
 ```bash
-python3 -m http.server 8080
+python3 server.py
 ```
 
-Open <http://localhost:8080/team> after first opening <http://localhost:8080/>. Python’s basic server does not rewrite a directly requested clean URL such as `/team/ABC`; navigate there through the app, or use Vercel/Netlify for production rewrites.
+Or, equivalently:
+
+```bash
+npm run serve
+```
+
+Open <http://localhost:8080>. The included server sends application routes such as `/team/ABC` to `index.html`, so direct links and browser refreshes work locally.
 
 To perform static syntax/config checks:
 

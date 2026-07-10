@@ -12,6 +12,7 @@ function walk(directory) {
   }
 }
 walk(join(root, "js"));
+walk(join(root, "api"));
 walk(join(root, "supabase", "functions"));
 
 for (const file of files.filter((path) => path.endsWith(".js") && !path.includes("/vendor/"))) {

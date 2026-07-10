@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "serve": "python3 -m http.server 8080",
+    "serve": "python3 server.py",
     "check": "node scripts/check.mjs"
   }
 }
