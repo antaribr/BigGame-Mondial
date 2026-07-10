@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { Shell, Stat, Skeleton } from "@/components/ui";
+import { Shell, Stat } from "@/components/ui";
 import {
   fetchStationByCode,
   fetchTeams,
@@ -70,7 +70,6 @@ export default function AdvisorPage() {
   const filtered = teams.filter((t) =>
     `${t.name} ${t.code}`.toLowerCase().includes(query.trim().toLowerCase()),
   );
-  const doneCount = completions.length;
 
   async function score(team: Team, n: number) {
     if (!station) return;
@@ -116,7 +115,6 @@ export default function AdvisorPage() {
 
   return (
     <Shell back="/advisor">
-      {/* Header */}
       <div className="text-center">
         <p className="text-sm font-medium uppercase tracking-wide text-slate-400">
           Advisor station
@@ -130,12 +128,11 @@ export default function AdvisorPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-3">
-        <Stat label="Teams scored" value={doneCount} />
+      <div className="grid grid-cols-2 gap-3">
+        <Stat label="Teams scored" value={completions.length} />
         <Stat label="Total teams" value={teams.length} />
       </div>
 
-      {/* Search — sticky so it's always reachable while scrolling teams */}
       <input
         className="input"
         placeholder="Search teams…"
@@ -143,7 +140,6 @@ export default function AdvisorPage() {
         onChange={(e) => setQuery(e.target.value)}
       />
 
-      {/* Teams */}
       <div className="space-y-3">
         {filtered.length === 0 && (
           <div className="card p-6 text-center text-slate-400">
@@ -162,16 +158,11 @@ export default function AdvisorPage() {
                     {memberCounts[t.id] ?? 0} members · {t.code}
                   </div>
                 </div>
-                <div
-                  className={`text-2xl font-bold ${
-                    c ? "text-emerald-600" : "text-slate-300"
-                  }`}
-                >
+                <div className={`text-2xl font-bold ${c ? "text-emerald-600" : "text-slate-300"}`}>
                   {c ? `${c.score}/${station.max_score}` : "—"}
                 </div>
               </div>
 
-              {/* Action row — full-width, thumb-friendly */}
               <div className="mt-3 flex gap-2">
                 {c ? (
                   <>
@@ -205,14 +196,8 @@ export default function AdvisorPage() {
                     Tap a score (0 – {station.max_score})
                   </p>
                   <div className="grid grid-cols-5 gap-2 sm:grid-cols-6">
-                    {Array.from(
-                      { length: station.max_score + 1 },
-                      (_, i) => i,
-                    ).map((n) => {
-                      const hue =
-                        station.max_score > 0
-                          ? (n / station.max_score) * 130
-                          : 65;
+                    {Array.from({ length: station.max_score + 1 }, (_, i) => i).map((n) => {
+                      const hue = station.max_score > 0 ? (n / station.max_score) * 130 : 65;
                       return (
                         <button
                           key={n}
