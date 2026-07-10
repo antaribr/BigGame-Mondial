@@ -1,5 +1,5 @@
 import QuestionManager from "../QuestionManager";
-import QuizAttemptsManager from "../QuizAttemptsManager";
+import QuizAttemptsManager from "../QuizAttempts";
 import Link from "next/link";
 
 export default function QuizAdminPage() {
