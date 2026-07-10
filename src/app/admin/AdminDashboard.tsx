@@ -186,6 +186,39 @@ export default function AdminDashboard() {
       </div>
     );
 
+  if (loadError)
+    return (
+      <main className="mx-auto max-w-4xl px-4 py-6 sm:px-5">
+        <header className="mb-6 flex items-center justify-between">
+          <Brand home="/admin" />
+          <button onClick={logout} className="btn-ghost text-sm">
+            Log out
+          </button>
+        </header>
+        <div className="card border-red-300 p-6">
+          <p className="font-display text-lg font-bold text-red-600">
+            ⚠️ Couldn't load admin data
+          </p>
+          <p className="mt-2 rounded-lg bg-red-50 px-3 py-2 font-mono text-sm break-all text-red-700">
+            {loadError}
+          </p>
+          <p className="mt-3 text-sm text-slate-600">
+            If this mentions <code className="rounded bg-slate-100 px-1">scores</code>{" "}
+            or <code className="rounded bg-slate-100 px-1">max_score</code> —
+            make sure the <b>latest code is deployed</b> (push to GitHub so
+            Vercel rebuilds) and run{" "}
+            <code className="rounded bg-slate-100 px-1">
+              migration_station_max_score.sql
+            </code>{" "}
+            in Supabase.
+          </p>
+          <button onClick={() => load()} className="btn-primary mt-4">
+            Try again
+          </button>
+        </div>
+      </main>
+    );
+
   return (
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-10 border-b border-slate-200 bg-white/80 px-4 py-3 backdrop-blur">
