@@ -21,7 +21,8 @@ There is no UI framework, compiler, bundler, generated component system, or runt
 - Station/member management and game reset
 - Public/hidden leaderboard switch
 - Timed one-attempt QR quiz with server-side grading
-- Question manager and sample JSON question import
+- Compatible with the existing `questions`, `quiz_attempts`, and `quiz_answers` tables—no extra assignment table
+- Question manager with Excel import/export and sample JSON import
 - Responsive mobile/desktop interface
 
 ## Routes
@@ -128,9 +129,25 @@ After changing environment variables, use **Redeploy → Clear build cache and r
 1. Open `/admin` and enter `ADMIN_CODE`.
 2. Add activity stations or select **Create QR station**.
 3. Open **Quiz manager**.
-4. Add questions manually or import `data/sample-questions.json`.
+4. Add questions manually, import an Excel workbook, or import `data/sample-questions.json`.
 5. Return to admin and select **Show QR code**.
 6. Print or share the generated QR code.
+
+## Excel question import and export
+
+Open **Admin → Quiz manager**:
+
+- **Excel template** downloads a ready-to-fill workbook with headers, instructions, formatting, and an A–D dropdown.
+- **Export Excel** downloads all current questions as an `.xlsx` workbook.
+- **Import Excel** accepts `.xlsx`, `.xls`, `.xlsm`, and `.csv` files up to 5 MB.
+
+The `Questions` sheet uses these columns:
+
+```text
+ID | Question | Option A | Option B | Option C | Option D | Correct Option
+```
+
+`Correct Option` must be `A`, `B`, `C`, or `D`. Keep the ID when editing an exported question so import updates it. Leave ID blank for a new question. The importer validates every row before writing anything and supports up to 500 questions per file.
 
 ## Local use
 

@@ -218,7 +218,7 @@ td { padding: .8rem 1rem; border-top: 1px solid #f1f5f9; vertical-align: top; }
 .spinner { width: 2rem; height: 2rem; margin: auto; border: 3px solid #c7d2fe; border-top-color: var(--indigo); border-radius: 50%; animation: spin .8s linear infinite; }
 .empty { padding: 2rem 1rem; color: var(--quiet); text-align: center; }
 .toast-region { position: fixed; right: 1rem; bottom: 1rem; z-index: 90; display: grid; gap: .5rem; width: min(24rem, calc(100vw - 2rem)); pointer-events: none; }
-.toast { padding: .8rem 1rem; border-radius: .75rem; color: #fff; background: #0f172a; box-shadow: 0 12px 35px rgba(15,23,42,.28); animation: toast-in .2s ease-out; }
+.toast { padding: .8rem 1rem; border-radius: .75rem; color: #fff; background: #0f172a; box-shadow: 0 12px 35px rgba(15,23,42,.28); animation: toast-in .2s ease-out; white-space: pre-line; }
 .toast.error { background: #b91c1c; }
 .toast.success { background: #047857; }
 

@@ -1,4 +1,4 @@
-import { randomInt } from "node:crypto";
+import { createHmac } from "node:crypto";
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const MAX_QUESTION_COUNT = 50;
@@ -10,9 +10,11 @@ function numberSetting(value, fallback, minimum, maximum) {
 }
 
 function getEnvironment() {
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
   return {
     supabaseUrl: String(process.env.SUPABASE_URL || "").replace(/\/$/, ""),
-    serviceKey: process.env.SUPABASE_SERVICE_ROLE_KEY || "",
+    serviceKey,
+    selectionSecret: process.env.QUIZ_SELECTION_SECRET || process.env.ADMIN_SESSION_SECRET || serviceKey,
     pointsPerCorrect: numberSetting(process.env.QUIZ_POINTS_PER_CORRECT, 0.5, 0, 100),
     quizSeconds: numberSetting(process.env.QUIZ_SECONDS, 20, 5, 3600),
     questionCount: Math.trunc(numberSetting(process.env.QUIZ_QUESTION_COUNT, 20, 1, MAX_QUESTION_COUNT)),
@@ -88,6 +90,14 @@ function insert(environment, table, body) {
   });
 }
 
+function remove(environment, table, params) {
+  return rest(environment, table, {
+    method: "DELETE",
+    params,
+    prefer: "return=minimal",
+  });
+}
+
 async function insertReturning(environment, table, body) {
   const rows = await rest(environment, table, {
     method: "POST",
@@ -154,54 +164,23 @@ async function findAttempt(environment, teamId, stationId, attemptId = "") {
   return rows?.[0] || null;
 }
 
-function secureShuffle(values) {
-  const output = [...values];
-  for (let index = output.length - 1; index > 0; index -= 1) {
-    const selected = randomInt(0, index + 1);
-    [output[index], output[selected]] = [output[selected], output[index]];
-  }
-  return output;
+function deterministicQuestions(rows, attemptId, count, secret) {
+  return [...rows]
+    .map((question) => ({
+      question,
+      order: createHmac("sha256", secret).update(`${attemptId}:${question.id}`).digest("hex"),
+    }))
+    .sort((left, right) => left.order.localeCompare(right.order))
+    .slice(0, count)
+    .map((item) => item.question);
 }
 
-async function ensureAssignedQuestions(environment, attemptId) {
-  let assignments = await read(environment, "quiz_attempt_questions", {
-    select: "question_id,position",
-    attempt_id: `eq.${attemptId}`,
-    order: "position.asc",
-  });
-
-  if (!assignments.length) {
-    const allQuestions = await read(environment, "questions", { select: "id" });
-    const selected = secureShuffle(allQuestions || []).slice(0, environment.questionCount);
-    if (!selected.length) return [];
-    const rows = selected.map((question, position) => ({
-      attempt_id: attemptId,
-      question_id: question.id,
-      position,
-    }));
-    try {
-      await insert(environment, "quiz_attempt_questions", rows);
-    } catch (error) {
-      if (error.code !== "23505") throw error;
-    }
-    assignments = await read(environment, "quiz_attempt_questions", {
-      select: "question_id,position",
-      attempt_id: `eq.${attemptId}`,
-      order: "position.asc",
-    });
-  }
-  return assignments;
-}
-
-async function publicQuestions(environment, assignments) {
-  if (!assignments.length) return [];
-  const ids = assignments.map((item) => item.question_id);
-  const rows = await read(environment, "questions", {
-    select: "id,question,option_a,option_b,option_c,option_d",
-    id: `in.(${ids.join(",")})`,
-  });
-  const byId = new Map((rows || []).map((row) => [row.id, row]));
-  return assignments.map((item) => byId.get(item.question_id)).filter(Boolean);
+async function attemptQuestions(environment, attemptId, includeCorrectOption = false) {
+  const columns = includeCorrectOption
+    ? "id,question,option_a,option_b,option_c,option_d,correct_option"
+    : "id,question,option_a,option_b,option_c,option_d";
+  const rows = await read(environment, "questions", { select: columns });
+  return deterministicQuestions(rows || [], attemptId, environment.questionCount, environment.selectionSecret);
 }
 
 async function startAttempt(environment, team, station) {
@@ -222,11 +201,11 @@ async function startAttempt(environment, team, station) {
     return { ok: true, attempt, results: attemptResult(attempt), questions: [] };
   }
 
-  const assignments = await ensureAssignedQuestions(environment, attempt.id);
+  const questions = await attemptQuestions(environment, attempt.id);
   return {
     ok: true,
     attempt,
-    questions: await publicQuestions(environment, assignments),
+    questions,
     limits: {
       seconds: environment.quizSeconds,
       pointsPerCorrect: environment.pointsPerCorrect,
@@ -242,20 +221,11 @@ async function submitAttempt(environment, body) {
   if (!attempt) throw new Error("Quiz attempt not found for this team.");
   if (attempt.completed_at) return { ok: true, attempt, results: attemptResult(attempt) };
 
-  const assignments = await read(environment, "quiz_attempt_questions", {
-    select: "question_id,position",
-    attempt_id: `eq.${attempt.id}`,
-    order: "position.asc",
-  });
-  if (!assignments.length) throw new Error("This attempt has no assigned questions.");
+  const selectedQuestions = await attemptQuestions(environment, attempt.id, true);
+  if (!selectedQuestions.length) throw new Error("No quiz questions are available.");
 
-  const ids = assignments.map((item) => item.question_id);
-  const correctRows = await read(environment, "questions", {
-    select: "id,correct_option",
-    id: `in.(${ids.join(",")})`,
-  });
-  const correctById = new Map((correctRows || []).map((row) => [row.id, row.correct_option]));
-  const allowedIds = new Set(ids);
+  const correctById = new Map(selectedQuestions.map((question) => [question.id, question.correct_option]));
+  const allowedIds = new Set(selectedQuestions.map((question) => question.id));
   const answerById = new Map();
 
   if (Array.isArray(body.answers) && body.answers.length <= MAX_QUESTION_COUNT) {
@@ -271,19 +241,22 @@ async function submitAttempt(environment, body) {
   const startedAt = new Date(attempt.started_at).getTime();
   const expired = !Number.isFinite(startedAt) || Date.now() > startedAt + (environment.quizSeconds + 5) * 1000;
   let correctCount = 0;
-  const answerRows = assignments.map((assignment) => {
-    const selected = expired ? null : (answerById.get(assignment.question_id) ?? null);
-    const isCorrect = selected !== null && selected === correctById.get(assignment.question_id);
+  const answerRows = selectedQuestions.map((question) => {
+    const selected = expired ? null : (answerById.get(question.id) ?? null);
+    const isCorrect = selected !== null && selected === correctById.get(question.id);
     if (isCorrect) correctCount += 1;
     return {
       attempt_id: attempt.id,
-      question_id: assignment.question_id,
+      question_id: question.id,
       selected_option: selected,
       is_correct: isCorrect,
     };
   });
 
-  await upsert(environment, "quiz_answers", answerRows, "attempt_id,question_id");
+  // The original three-table quiz schema has no compound unique constraint on
+  // quiz_answers. Replace this attempt's rows instead of using ON CONFLICT.
+  await remove(environment, "quiz_answers", { attempt_id: `eq.${attempt.id}` });
+  await insert(environment, "quiz_answers", answerRows);
   const score = Math.min(Number(station.max_score), correctCount * environment.pointsPerCorrect);
   const completedAt = new Date().toISOString();
 
@@ -297,7 +270,7 @@ async function submitAttempt(environment, body) {
   const completed = await updateReturning(environment, "quiz_attempts", {
     score,
     correct_answers: correctCount,
-    questions_answered: assignments.length,
+    questions_answered: selectedQuestions.length,
     completed_at: completedAt,
   }, {
     id: `eq.${attempt.id}`,

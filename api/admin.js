@@ -1,6 +1,7 @@
 import { createHash, createHmac, randomInt, timingSafeEqual } from "node:crypto";
 
 const ZERO_UUID = "00000000-0000-0000-0000-000000000000";
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 function getEnvironment() {
   return {
@@ -57,6 +58,12 @@ function requireString(value, field, max = 500) {
   if (!clean) throw new Error(`${field} is required.`);
   if (clean.length > max) throw new Error(`${field} is too long.`);
   return clean;
+}
+
+function requireUuid(value, field) {
+  const id = requireString(value, field, 50);
+  if (!UUID_PATTERN.test(id)) throw new Error(`${field} is not valid.`);
+  return id;
 }
 
 async function rest(environment, table, {
@@ -178,7 +185,6 @@ async function handleAction(body, environment) {
 
     case "resetGame":
       await remove(environment, "quiz_answers", { id: `neq.${ZERO_UUID}` });
-      await remove(environment, "quiz_attempt_questions", { attempt_id: `neq.${ZERO_UUID}` });
       await remove(environment, "quiz_attempts", { id: `neq.${ZERO_UUID}` });
       await remove(environment, "completions", { id: `neq.${ZERO_UUID}` });
       await remove(environment, "members", { id: `neq.${ZERO_UUID}` });
@@ -225,35 +231,39 @@ async function handleAction(body, environment) {
       if (!["A", "B", "C", "D"].includes(question.correct_option)) {
         throw new Error("Correct option must be A, B, C, or D.");
       }
-      if (input.id) await update(environment, "questions", question, { id: `eq.${input.id}` });
+      if (input.id) await update(environment, "questions", question, { id: `eq.${requireUuid(input.id, "Question id")}` });
       else await insert(environment, "questions", question);
       return { ok: true };
     }
 
     case "deleteQuestion":
-      await remove(environment, "questions", { id: `eq.${requireString(body.id, "Question id", 50)}` });
+      await remove(environment, "questions", { id: `eq.${requireUuid(body.id, "Question id")}` });
       return { ok: true };
 
     case "importQuestions": {
-      if (!Array.isArray(body.questions) || !body.questions.length || body.questions.length > 100) {
-        throw new Error("Provide 1–100 questions.");
+      if (!Array.isArray(body.questions) || !body.questions.length || body.questions.length > 500) {
+        throw new Error("Provide 1–500 questions.");
       }
-      const rows = body.questions.map((input) => {
+      const rows = body.questions.map((input, index) => {
         const row = {
-          question: requireString(input.question, "Question", 1000),
-          option_a: requireString(input.option_a, "Option A", 500),
-          option_b: requireString(input.option_b, "Option B", 500),
-          option_c: requireString(input.option_c, "Option C", 500),
-          option_d: requireString(input.option_d, "Option D", 500),
+          question: requireString(input.question, `Question in row ${index + 2}`, 1000),
+          option_a: requireString(input.option_a, `Option A in row ${index + 2}`, 500),
+          option_b: requireString(input.option_b, `Option B in row ${index + 2}`, 500),
+          option_c: requireString(input.option_c, `Option C in row ${index + 2}`, 500),
+          option_d: requireString(input.option_d, `Option D in row ${index + 2}`, 500),
           correct_option: normalizeCode(input.correct_option),
         };
         if (!["A", "B", "C", "D"].includes(row.correct_option)) {
-          throw new Error("Every correct option must be A, B, C, or D.");
+          throw new Error(`Correct option in row ${index + 2} must be A, B, C, or D.`);
         }
+        if (input.id) row.id = requireUuid(input.id, `Question ID in row ${index + 2}`);
         return row;
       });
-      await insert(environment, "questions", rows);
-      return { ok: true, imported: rows.length };
+      const inserts = rows.filter((row) => !row.id);
+      const updates = rows.filter((row) => row.id);
+      if (updates.length) await insert(environment, "questions", updates, { upsert: true, conflict: "id" });
+      if (inserts.length) await insert(environment, "questions", inserts);
+      return { ok: true, imported: rows.length, updated: updates.length, inserted: inserts.length };
     }
 
     case "resetQuizAttempts":

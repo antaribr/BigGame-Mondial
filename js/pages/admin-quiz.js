@@ -1,4 +1,5 @@
 import { adminStatus, callAdmin } from "../admin-api.js";
+import { exportQuestionsToExcel, importQuestionsFromExcel } from "../excel.js";
 import { escapeHTML, formatPoints, formatTime, loadingPage, setButtonBusy, shell, showToast, stat } from "../ui.js";
 
 const EMPTY_QUESTION = { question: "", option_a: "", option_b: "", option_c: "", option_d: "", correct_option: "A" };
@@ -50,7 +51,7 @@ export async function renderAdminQuiz(root, context) {
 
     const questionList = questions.length ? questions.map((question, index) => `<article class="card card-pad">
       <div style="display:flex;align-items:flex-start;gap:1rem"><span class="quiet small">#${index + 1}</span><div style="flex:1;min-width:0"><strong>${escapeHTML(question.question)}</strong><div class="form-grid" style="gap:.4rem;margin-top:.65rem">${["A", "B", "C", "D"].map((option) => `<div class="small" style="padding:.35rem .5rem;border-radius:.4rem;background:${question.correct_option === option ? "#d1fae5" : "#f8fafc"};color:${question.correct_option === option ? "#047857" : "#475569"}">${option}. ${escapeHTML(question[`option_${option.toLowerCase()}`])}${question.correct_option === option ? " ✓" : ""}</div>`).join("")}</div></div><div class="form-actions"><button class="btn-link edit-question" data-id="${question.id}" type="button">Edit</button><button class="btn-link danger delete-question" data-id="${question.id}" type="button">Delete</button></div></div>
-    </article>`).join("") : `<div class="card empty">No questions yet. Add a question or import the JSON samples.</div>`;
+    </article>`).join("") : `<div class="card empty">No questions yet. Add one manually, import Excel, or load the sample JSON.</div>`;
 
     const attemptRows = filtered.length ? filtered.map((attempt) => {
       const team = teamMap.get(attempt.team_id);
@@ -60,7 +61,7 @@ export async function renderAdminQuiz(root, context) {
     root.innerHTML = shell(`
       <section style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap"><div><h1 class="page-title" style="font-size:1.8rem">📱 QR Quiz Manager</h1><p class="muted">Manage quiz questions and team attempts.</p></div><div class="form-actions"><button id="refresh-quiz" class="btn btn-ghost" type="button">Refresh</button><button id="add-question" class="btn btn-primary" type="button">+ Add question</button></div></section>
       ${questionForm}
-      <section class="stack-sm"><div style="display:flex;justify-content:space-between;align-items:end;gap:1rem;flex-wrap:wrap"><div><h2 class="section-title">Questions</h2><p class="small muted">${questions.length} questions · answers are graded securely in the server API.</p></div><button id="import-questions" class="btn btn-ghost btn-small" type="button">Import sample-questions.json</button></div>${questionList}</section>
+      <section class="stack-sm"><div style="display:flex;justify-content:space-between;align-items:end;gap:1rem;flex-wrap:wrap"><div><h2 class="section-title">Questions</h2><p class="small muted">${questions.length} questions · answers are graded securely in the server API.</p></div><div class="form-actions"><a href="/data/BigGame-Quiz-Import-Template.xlsx" class="btn btn-ghost btn-small" download>Excel template</a><button id="export-excel" class="btn btn-ghost btn-small" type="button" ${questions.length ? "" : "disabled"}>Export Excel (${questions.length})</button><button id="import-excel" class="btn btn-primary btn-small" type="button">Import Excel</button><button id="import-samples" class="btn btn-ghost btn-small" type="button">Import sample JSON</button><input id="excel-file" class="sr-only" type="file" accept=".xlsx,.xls,.xlsm,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv"></div></div>${questionList}</section>
       <hr style="border:0;border-top:1px solid var(--line)">
       <section class="stack-sm"><div><h2 class="section-title">Quiz attempts</h2><p class="small muted">Monitor team progress and reset attempts when needed.</p></div>
         <div class="grid-4">${stat("Attempts", attempts.length)}${stat("Completed", completed.length)}${stat("In progress", attempts.length - completed.length)}${stat("Points given", formatPoints(totalPoints))}</div>
@@ -91,7 +92,10 @@ export async function renderAdminQuiz(root, context) {
       try { await callAdmin("deleteQuestion", { id: button.dataset.id }); showToast("Question deleted", "success"); await load(); }
       catch (error) { showToast(error.message, "error"); }
     }));
-    root.querySelector("#import-questions")?.addEventListener("click", importQuestions);
+    root.querySelector("#export-excel")?.addEventListener("click", exportExcel);
+    root.querySelector("#import-excel")?.addEventListener("click", () => root.querySelector("#excel-file")?.click());
+    root.querySelector("#excel-file")?.addEventListener("change", importExcel);
+    root.querySelector("#import-samples")?.addEventListener("click", importSampleQuestions);
     root.querySelectorAll("[data-filter]").forEach((button) => button.addEventListener("click", () => { filter = button.dataset.filter; draw(); }));
     root.querySelector("#reset-attempts")?.addEventListener("click", async (event) => {
       if (!window.confirm("Delete ALL quiz attempts and answers?")) return;
@@ -112,7 +116,46 @@ export async function renderAdminQuiz(root, context) {
     catch (error) { showToast(error.message, "error"); setButtonBusy(button, false); }
   }
 
-  async function importQuestions(event) {
+  function exportExcel() {
+    try {
+      exportQuestionsToExcel(questions);
+      showToast(questions.length ? `${questions.length} questions exported to Excel` : "Excel template downloaded", "success");
+    } catch (error) {
+      showToast(error.message || "Could not export the Excel file.", "error");
+    }
+  }
+
+  async function importExcel(event) {
+    const input = event.currentTarget;
+    const file = input.files?.[0];
+    const button = root.querySelector("#import-excel");
+    if (!file || !button) return;
+    setButtonBusy(button, true, "Reading Excel…");
+    try {
+      const imported = await importQuestionsFromExcel(file);
+      const updates = imported.filter((question) => question.id).length;
+      const additions = imported.length - updates;
+      const summary = [
+        updates ? `update ${updates}` : "",
+        additions ? `add ${additions}` : "",
+      ].filter(Boolean).join(" and ");
+      if (!window.confirm(`Import ${imported.length} Excel question(s)? This will ${summary}.`)) {
+        setButtonBusy(button, false);
+        return;
+      }
+      setButtonBusy(button, true, "Importing…");
+      const result = await callAdmin("importQuestions", { questions: imported });
+      showToast(`Excel import complete: ${result.updated || 0} updated, ${result.inserted || 0} added`, "success");
+      await load();
+    } catch (error) {
+      showToast(error.message || "Could not import the Excel file.", "error");
+      setButtonBusy(button, false);
+    } finally {
+      input.value = "";
+    }
+  }
+
+  async function importSampleQuestions(event) {
     const button = event.currentTarget;
     setButtonBusy(button, true, "Importing…");
     try {

@@ -72,14 +72,6 @@ create table if not exists public.quiz_attempts (
   unique (team_id, station_id)
 );
 
-create table if not exists public.quiz_attempt_questions (
-  attempt_id uuid not null references public.quiz_attempts(id) on delete cascade,
-  question_id uuid not null references public.questions(id) on delete cascade,
-  position integer not null,
-  primary key (attempt_id, question_id),
-  unique (attempt_id, position)
-);
-
 create table if not exists public.quiz_answers (
   id uuid primary key default gen_random_uuid(),
   attempt_id uuid not null references public.quiz_attempts(id) on delete cascade,
@@ -99,7 +91,6 @@ create index if not exists idx_members_team on public.members(team_id);
 create index if not exists idx_completions_team on public.completions(team_id);
 create index if not exists idx_completions_station on public.completions(station_id);
 create index if not exists idx_quiz_attempts_team on public.quiz_attempts(team_id);
-create index if not exists idx_quiz_attempt_questions_attempt on public.quiz_attempt_questions(attempt_id);
 create index if not exists idx_quiz_answers_attempt on public.quiz_answers(attempt_id);
 
 create view public.leaderboard as
@@ -126,7 +117,6 @@ alter table public.completions enable row level security;
 alter table public.settings enable row level security;
 alter table public.questions enable row level security;
 alter table public.quiz_attempts enable row level security;
-alter table public.quiz_attempt_questions enable row level security;
 alter table public.quiz_answers enable row level security;
 
 drop policy if exists "read teams" on public.teams;
@@ -162,7 +152,6 @@ revoke all on table public.completions from anon, authenticated;
 revoke all on table public.settings from anon, authenticated;
 revoke all on table public.questions from anon, authenticated;
 revoke all on table public.quiz_attempts from anon, authenticated;
-revoke all on table public.quiz_attempt_questions from anon, authenticated;
 revoke all on table public.quiz_answers from anon, authenticated;
 
 grant select (id, name, created_at) on table public.teams to anon, authenticated;
