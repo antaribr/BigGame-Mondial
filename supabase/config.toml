@@ -1,0 +1,11 @@
+project_id = "biggame-vanilla"
+
+[functions.admin-api]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/admin-api/index.js"
+
+[functions.quiz-api]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/quiz-api/index.js"
