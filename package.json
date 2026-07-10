@@ -6,5 +6,8 @@
   "scripts": {
     "serve": "python3 server.py",
     "check": "node scripts/check.mjs"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "2.48.1"
   }
 }

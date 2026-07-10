@@ -1,6 +1,6 @@
 {
-  "supabaseUrl": "https://dymiiwnnhvgjoipyhrag.supabase.co",
-  "supabaseAnonKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR5bWlpd25uaHZnam9pcHlocmFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1MzE2OTUsImV4cCI6MjA5OTEwNzY5NX0.p6v5zxpTQ64YWyo_0oPDBdoIAlE13lahPmpdJgxczhE",
+  "supabaseUrl": "https://YOUR-PROJECT.supabase.co",
+  "supabaseAnonKey": "YOUR_PUBLIC_ANON_KEY",
   "adminFunction": "admin-api",
   "quizFunction": "quiz-api",
   "quiz": {

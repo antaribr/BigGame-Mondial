@@ -28,28 +28,24 @@ export async function adminStatus() {
 }
 
 export async function callAdmin(action, payload = {}, needsToken = true) {
-  const config = getConfig();
-  const headers = {
-    "Content-Type": "application/json",
-    apikey: config.supabaseAnonKey,
-    Authorization: `Bearer ${config.supabaseAnonKey}`,
-  };
+  const headers = { "Content-Type": "application/json" };
   if (needsToken) headers["x-admin-token"] = getAdminToken();
 
   let response;
   try {
-    response = await fetch(`${config.supabaseUrl}/functions/v1/${config.adminFunction}`, {
+    response = await fetch("/api/admin", {
       method: "POST",
       headers,
       body: JSON.stringify({ action, ...payload }),
     });
   } catch {
-    throw new Error("Could not reach the admin Edge Function.");
+    throw new Error("Could not reach the Vercel admin API.");
   }
 
   const body = await response.json().catch(() => ({}));
   if (!response.ok || body.ok === false) {
     if (response.status === 401) clearAdminToken();
+    if (response.status === 404) throw new Error("The api/admin.js file has not been deployed to Vercel.");
     throw new Error(body.error || `Admin request failed (${response.status})`);
   }
   return body;
