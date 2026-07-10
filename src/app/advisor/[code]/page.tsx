@@ -100,19 +100,14 @@ export default function AdvisorPage() {
     }
   }
 
-  if (loading)
-    return (
-      <Shell back="/advisor" backLabel="← Switch station">
-        <Skeleton />
-      </Shell>
-    );
+  if (loading) return <Shell back="/advisor">{/* <Skeleton /> */}</Shell>;
 
   if (notFound || !station)
     return (
-      <Shell back="/advisor" backLabel="← Switch station">
+      <Shell back="/advisor">
         <div className="card p-8 text-center">
-          <p className="text-lg font-semibold">Station not found</p>
-          <Link className="btn-primary mt-5" href="/advisor">
+          <h1 className="text-xl font-bold">Station not found</h1>
+          <Link href="/advisor" className="btn-primary mt-4 inline-block">
             Enter station code
           </Link>
         </div>
@@ -120,43 +115,38 @@ export default function AdvisorPage() {
     );
 
   return (
-    <Shell back="/advisor" backLabel="← Switch station">
+    <Shell back="/advisor">
       {/* Header */}
-      <div className="card relative overflow-hidden p-5 sm:p-6">
-        <div className="absolute -right-16 -top-16 h-40 w-40 rounded-full bg-gradient-to-br from-fuchsia-400/25 to-amber-400/20 blur-3xl" />
-        <div className="relative">
-          <div className="text-xs uppercase tracking-widest text-amber-600">
-            Advisor station
-          </div>
-          <h1 className="font-display text-2xl font-bold leading-tight sm:text-3xl">
-            {station.name}
-          </h1>
-          {station.description && (
-            <p className="mt-1 text-sm text-slate-600">{station.description}</p>
-          )}
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            <div className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 font-mono text-sm tracking-widest text-fuchsia-600">
-              {station.code}
-            </div>
-            <Stat label="Scored" value={`${doneCount}/${teams.length}`} />
-          </div>
+      <div className="text-center">
+        <p className="text-sm font-medium uppercase tracking-wide text-slate-400">
+          Advisor station
+        </p>
+        <h1 className="mt-1 text-3xl font-bold">{station.name}</h1>
+        {station.description && (
+          <p className="mt-1 text-slate-500">{station.description}</p>
+        )}
+        <div className="mt-2 inline-block rounded-lg bg-slate-100 px-3 py-1 font-mono text-sm font-semibold text-slate-600">
+          {station.code}
         </div>
       </div>
 
-      {/* Search — sticky so it's always reachable while scrolling teams */}
-      <div className="sticky top-0 z-10 -mx-4 bg-slate-50/90 px-4 py-3 backdrop-blur sm:-mx-5 sm:px-5">
-        <input
-          className="input"
-          placeholder="Search teams…"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
+      <div className="grid grid-cols-3 gap-3">
+        <Stat label="Teams scored" value={doneCount} />
+        <Stat label="Total teams" value={teams.length} />
       </div>
 
+      {/* Search — sticky so it's always reachable while scrolling teams */}
+      <input
+        className="input"
+        placeholder="Search teams…"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+      />
+
       {/* Teams */}
-      <div className="mt-3 space-y-2">
+      <div className="space-y-3">
         {filtered.length === 0 && (
-          <div className="card p-6 text-center text-sm text-slate-500">
+          <div className="card p-6 text-center text-slate-400">
             No teams found.
           </div>
         )}
@@ -164,33 +154,25 @@ export default function AdvisorPage() {
           const c = byTeam.get(t.id);
           const open = openId === t.id;
           return (
-            <div
-              key={t.id}
-              className={`card overflow-hidden ${
-                c ? "border-emerald-400" : ""
-              }`}
-            >
-              <div className="flex items-center gap-3 p-3.5">
-                <div className="min-w-0 flex-1">
-                  <div className="truncate text-base font-semibold text-slate-900">
-                    {t.name}
-                  </div>
-                  <div className="text-xs text-slate-500">
+            <div key={t.id} className="card p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="font-semibold">{t.name}</div>
+                  <div className="text-xs text-slate-400">
                     {memberCounts[t.id] ?? 0} members · {t.code}
                   </div>
                 </div>
-                {c ? (
-                  <span className="shrink-0 rounded-lg bg-emerald-100 px-3 py-1.5 font-bold text-emerald-700">
-                    {c.score}/10
-                  </span>
-                ) : (
-                  <span className="shrink-0 rounded-lg bg-slate-100 px-2.5 py-1 text-xs text-slate-500">
-                    —
-                  </span>
-                )}
+                <div
+                  className={`text-2xl font-bold ${
+                    c ? "text-emerald-600" : "text-slate-300"
+                  }`}
+                >
+                  {c ? `${c.score}/${station.max_score}` : "—"}
+                </div>
               </div>
+
               {/* Action row — full-width, thumb-friendly */}
-              <div className="flex gap-2 border-t border-slate-100 px-3 py-2">
+              <div className="mt-3 flex gap-2">
                 {c ? (
                   <>
                     <button
@@ -216,12 +198,13 @@ export default function AdvisorPage() {
                   </button>
                 )}
               </div>
+
               {open && (
-                <div className="border-t border-slate-200 bg-slate-50 p-3">
-                  <div className="mb-2 text-xs uppercase tracking-wider text-slate-500">
+                <div className="mt-3 space-y-2">
+                  <p className="text-center text-xs text-slate-500">
                     Tap a score (0 – {station.max_score})
-                  </div>
-                  <div className="grid grid-cols-5 gap-2">
+                  </p>
+                  <div className="grid grid-cols-5 gap-2 sm:grid-cols-6">
                     {Array.from(
                       { length: station.max_score + 1 },
                       (_, i) => i,

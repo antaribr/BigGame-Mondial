@@ -9,7 +9,7 @@ import type {
   Settings,
 } from "./types";
 
-/* ----------------------------- Reads ----------------------------- */
+/* ────────────────────────────────────────────────────────────── Reads ────── */
 
 export async function fetchTeamByCode(code: string): Promise<Team | null> {
   const { data } = await supabase
@@ -102,9 +102,8 @@ export async function fetchAllMembers(): Promise<Member[]> {
   return (data ?? []) as Member[];
 }
 
-/* ----------------------------- Writes ---------------------------- */
+/* ────────────────────────────────────────────────────────────── Writes ───── */
 
-/** Create a team + its members. Retries on rare code collisions. */
 export async function registerTeam(
   name: string,
   memberNames: string[],

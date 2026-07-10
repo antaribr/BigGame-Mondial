@@ -6,8 +6,8 @@ import { Brand } from "./Brand";
 import type { LeaderboardRow } from "@/lib/types";
 
 /** Standard page shell: top nav + centered container.
- *  Pass `back` to show a back link (and make the logo clickable).
- *  Omit it to "lock in" the user — no back link, static logo. */
+ * Pass `back` to show a back link (and make the logo clickable).
+ * Omit it to "lock in" the user — no back link, static logo. */
 export function Shell({
   children,
   back,
@@ -18,32 +18,34 @@ export function Shell({
   backLabel?: string;
 }) {
   return (
-    <main className="mx-auto flex min-h-screen max-w-3xl flex-col px-4 py-5 sm:px-5">
-      <header className="mb-5 flex items-center justify-between">
-        <Brand home={back} />
-        {back && (
-          <Link
-            href={back}
-            className="text-sm text-slate-500 hover:text-slate-900"
-          >
-            {backLabel}
-          </Link>
-        )}
+    <div className="flex min-h-screen flex-col">
+      <header className="sticky top-0 z-10 border-b border-slate-200 bg-white/80 px-4 py-3 backdrop-blur">
+        <div className="mx-auto flex max-w-3xl items-center gap-4">
+          <Brand home={back} />
+          {back && (
+            <Link
+              href={back}
+              className="ml-auto text-sm font-medium text-slate-500 hover:text-slate-900"
+            >
+              {backLabel}
+            </Link>
+          )}
+        </div>
       </header>
-      {children}
-    </main>
+      <main className="flex-1 px-4 py-8">
+        <div className="mx-auto max-w-3xl space-y-6">{children}</div>
+      </main>
+    </div>
   );
 }
 
 export function Stat({ label, value }: { label: string; value: ReactNode }) {
   return (
-    <div className="min-w-[72px] rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-center">
-      <div className="font-display text-xl font-bold leading-none text-slate-900">
-        {value}
-      </div>
-      <div className="mt-1 text-[10px] uppercase tracking-wider text-slate-500">
+    <div className="card flex flex-col gap-1 p-4 text-center">
+      <span className="text-2xl font-bold">{value}</span>
+      <span className="text-xs font-medium uppercase tracking-wide text-slate-400">
         {label}
-      </div>
+      </span>
     </div>
   );
 }
@@ -60,10 +62,10 @@ export function TabButton({
   return (
     <button
       onClick={onClick}
-      className={`flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition ${
+      className={`rounded-full px-4 py-1.5 text-sm font-semibold transition ${
         active
-          ? "bg-white text-slate-900 shadow-sm"
-          : "text-slate-500 hover:text-slate-900"
+          ? "bg-slate-900 text-white"
+          : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
       }`}
     >
       {children}
@@ -73,10 +75,9 @@ export function TabButton({
 
 export function Skeleton() {
   return (
-    <div className="space-y-4">
-      <div className="card h-28 animate-pulse bg-slate-100" />
-      <div className="card h-10 animate-pulse bg-slate-100" />
-      <div className="card h-40 animate-pulse bg-slate-100" />
+    <div className="card animate-pulse p-6">
+      <div className="h-4 w-1/3 rounded bg-slate-200" />
+      <div className="mt-2 h-8 w-1/2 rounded bg-slate-200" />
     </div>
   );
 }
@@ -94,7 +95,7 @@ export function LeaderboardList({
 }) {
   if (rows.length === 0)
     return (
-      <div className={`card p-6 text-center text-sm text-slate-500 ${className}`}>
+      <div className="card p-6 text-center text-slate-500">
         No teams yet.
       </div>
     );
@@ -106,33 +107,27 @@ export function LeaderboardList({
         return (
           <div
             key={r.team_id}
-            className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 ${
-              me
-                ? "border-fuchsia-400 bg-fuchsia-50"
-                : "border-slate-200 bg-white"
+            className={`card flex items-center gap-4 p-4 ${
+              me ? "border-indigo-400 bg-indigo-50" : ""
             }`}
           >
-            <div className="w-7 text-center font-display text-lg font-bold text-slate-500">
+            <span className="min-w-[2.5rem] text-center text-lg font-bold text-slate-400">
               {r.rank <= 3 ? MEDALS[r.rank - 1] : r.rank}
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="truncate font-semibold text-slate-900">
-                {r.team_name}
-                {me && (
-                  <span className="ml-2 text-xs text-fuchsia-600">you</span>
-                )}
-              </div>
-              <div className="text-xs text-slate-500">
+            </span>
+            <div className="flex-1">
+              <div className="font-semibold text-slate-900">{r.team_name}</div>
+              {me && (
+                <span className="text-xs font-medium text-indigo-600">you</span>
+              )}
+              <div className="text-xs text-slate-400">
                 {r.tasks_completed} tasks done
               </div>
             </div>
             <div className="text-right">
-              <div className="font-display text-lg font-bold text-amber-600">
+              <div className="text-2xl font-bold text-slate-900">
                 {r.total_points}
               </div>
-              <div className="text-[10px] uppercase tracking-wider text-slate-400">
-                pts
-              </div>
+              <div className="text-xs text-slate-400">pts</div>
             </div>
           </div>
         );

@@ -73,22 +73,15 @@ export default function TeamDashboardPage() {
   const totalPoints = completions.reduce((a, c) => a + c.score, 0);
   const myRow = leaderboard.find((r) => r.team_id === team?.id);
 
-  if (loading)
-    return (
-      <Shell>
-        <Skeleton />
-      </Shell>
-    );
+  if (loading) return <Shell back="/team">{/* <Skeleton /> */}</Shell>;
 
   if (notFound || !team)
     return (
-      <Shell>
+      <Shell back="/team">
         <div className="card p-8 text-center">
-          <p className="text-lg font-semibold">Team not found</p>
-          <p className="mt-1 text-sm text-slate-500">
-            This team code doesn't exist.
-          </p>
-          <Link className="btn-primary mt-5" href="/team">
+          <h1 className="text-xl font-bold">Team not found</h1>
+          <p className="mt-2 text-slate-500">This team code doesn't exist.</p>
+          <Link href="/team" className="btn-primary mt-4 inline-block">
             Register a team
           </Link>
         </div>
@@ -96,46 +89,32 @@ export default function TeamDashboardPage() {
     );
 
   return (
-    <Shell>
+    <Shell back="/team">
       {/* Header */}
-      <div className="card relative overflow-hidden p-5 sm:p-6">
-        <div className="absolute -right-16 -top-16 h-40 w-40 rounded-full bg-gradient-to-br from-indigo-400/25 to-fuchsia-400/20 blur-3xl" />
-        <div className="relative flex flex-col gap-4">
-          <div className="min-w-0">
-            <div className="text-xs uppercase tracking-widest text-fuchsia-600">
-              Your team
-            </div>
-            <h1 className="font-display text-2xl font-bold leading-tight sm:text-3xl">
-              {team.name}
-            </h1>
-            <div className="mt-2 flex items-center gap-2 text-sm text-slate-500">
-              <span>Code:</span>
-              <button
-                onClick={() => navigator.clipboard?.writeText(team.code)}
-                className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 font-mono font-semibold tracking-widest text-amber-600"
-                title="Copy code"
-              >
-                {team.code}
-              </button>
-            </div>
-          </div>
-          {/* Stats: always show own points + tasks. Show rank only if board open. */}
-          <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
-            <Stat label="Points" value={totalPoints} />
-            <Stat
-              label="Done"
-              value={`${completions.length}/${stations.length}`}
-            />
-            {boardOpen && (
-              <Stat label="Rank" value={myRow ? `#${myRow.rank}` : "—"} />
-            )}
-          </div>
-        </div>
+      <div className="text-center">
+        <p className="text-sm font-medium uppercase tracking-wide text-slate-400">
+          Your team
+        </p>
+        <h1 className="mt-1 text-3xl font-bold">{team.name}</h1>
+        <button
+          onClick={() => navigator.clipboard?.writeText(team.code)}
+          className="mt-2 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 font-mono font-semibold tracking-widest text-amber-600"
+          title="Copy code"
+        >
+          {team.code}
+        </button>
+      </div>
+
+      {/* Stats: always show own points + tasks. Show rank only if board open. */}
+      <div className="grid grid-cols-3 gap-3">
+        <Stat label="Total pts" value={totalPoints} />
+        <Stat label="Tasks done" value={completions.length} />
+        {boardOpen && <Stat label="Rank" value={myRow?.rank ?? "—"} />}
       </div>
 
       {/* Tabs — only when the leaderboard is public */}
       {boardOpen && (
-        <div className="mt-5 flex rounded-xl border border-slate-200 bg-slate-100 p-1">
+        <div className="flex justify-center gap-2">
           <TabButton active={tab === "tasks"} onClick={() => setTab("tasks")}>
             My Tasks
           </TabButton>
@@ -146,44 +125,41 @@ export default function TeamDashboardPage() {
       )}
 
       {!boardOpen && (
-        <div className="mt-5 rounded-xl border border-amber-300 bg-amber-50 px-4 py-2.5 text-sm text-amber-700">
+        <div className="rounded-xl bg-slate-100 p-4 text-center text-sm text-slate-500">
           🔒 The live leaderboard is currently hidden by the organizer.
         </div>
       )}
 
       {(boardOpen ? tab === "tasks" : true) && (
-        <div className="mt-5 space-y-5">
+        <>
           {/* Members — READ ONLY (only the admin can change them) */}
-          <div className="card p-4">
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-slate-500">
+          <div className="card p-5">
+            <h2 className="mb-3 font-semibold text-slate-700">
               Members ({members.length})
             </h2>
             {members.length === 0 ? (
               <p className="text-sm text-slate-400">No members yet.</p>
             ) : (
-              <div className="flex flex-wrap gap-2">
+              <ul className="space-y-1">
                 {members.map((m) => (
-                  <span
-                    key={m.id}
-                    className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 py-1 pl-3 pr-3 text-sm text-slate-800"
-                  >
-                    {m.name}
-                  </span>
+                  <li key={m.id} className="text-sm text-slate-700">
+                    • {m.name}
+                  </li>
                 ))}
-              </div>
+              </ul>
             )}
           </div>
 
-          <div>
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-slate-500">
+          <div className="card p-5">
+            <h2 className="mb-3 font-semibold text-slate-700">
               All stations ({stations.length})
             </h2>
             {stations.length === 0 ? (
-              <div className="card p-6 text-center text-sm text-slate-500">
+              <p className="text-sm text-slate-400">
                 No stations yet. Ask the organizer to add tasks.
-              </div>
+              </p>
             ) : (
-              <div className="grid gap-3 sm:grid-cols-2">
+              <ul className="space-y-3">
                 {stations.map((s) => {
                   const done = byStation.get(s.id);
                   const max =
@@ -191,51 +167,43 @@ export default function TeamDashboardPage() {
                       ? s.max_score
                       : 10;
                   return (
-                    <div
+                    <li
                       key={s.id}
-                      className={`card p-4 ${
-                        done ? "border-emerald-400 bg-emerald-50" : ""
-                      }`}
+                      className="flex items-center justify-between rounded-lg border border-slate-100 bg-slate-50 p-3"
                     >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <div className="font-semibold text-slate-900">
-                            {s.name}
+                      <div>
+                        <div className="font-medium">{s.name}</div>
+                        {s.description && (
+                          <div className="mt-0.5 text-xs text-slate-400">
+                            {s.description}
                           </div>
-                          {s.description && (
-                            <div className="mt-0.5 text-sm text-slate-500">
-                              {s.description}
-                            </div>
-                          )}
-                          <span className="mt-2 inline-block rounded-md bg-indigo-50 px-2 py-0.5 text-xs font-semibold text-indigo-700">
-                            🎯 max of {max} pts
-                          </span>
+                        )}
+                        <div className="mt-1 text-xs text-slate-400">
+                          🎯 max of {max} pts
                         </div>
+                      </div>
+                      <div
+                        className={`text-lg font-bold ${
+                          done ? "text-emerald-600" : "text-slate-300"
+                        }`}
+                      >
                         {done ? (
-                          <span className="shrink-0 rounded-lg bg-emerald-100 px-2.5 py-1 text-sm font-bold text-emerald-700">
-                            +{done.score}
-                          </span>
+                          `+${done.score}`
                         ) : (
-                          <span className="shrink-0 rounded-lg bg-slate-100 px-2.5 py-1 text-xs text-slate-500">
-                            Pending
-                          </span>
+                          <span className="text-sm font-normal">Pending</span>
                         )}
                       </div>
-                    </div>
+                    </li>
                   );
                 })}
-              </div>
+              </ul>
             )}
           </div>
-        </div>
+        </>
       )}
 
       {boardOpen && tab === "board" && (
-        <LeaderboardList
-          rows={leaderboard}
-          currentTeamId={team.id}
-          className="mt-5"
-        />
+        <LeaderboardList rows={leaderboard} currentTeamId={team.id} />
       )}
     </Shell>
   );

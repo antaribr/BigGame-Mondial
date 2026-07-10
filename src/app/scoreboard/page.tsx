@@ -26,77 +26,75 @@ export default function ScoreboardPage() {
   const rest = rows.slice(3);
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-5xl flex-col px-4 py-6">
-      <header className="mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <span className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-indigo-600 via-fuchsia-600 to-amber-500 text-lg font-black text-white">
-            B
-          </span>
-          <div>
-            <div className="font-display text-xl font-bold leading-none text-slate-900">
-              Live Scoreboard
+    <div className="min-h-screen bg-slate-900 px-4 py-10 text-white">
+      <div className="mx-auto max-w-2xl space-y-8">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold">🏆 Live Scoreboard</h1>
+        </div>
+
+        {loading ? (
+          <div className="text-center text-slate-400">Loading…</div>
+        ) : rows.length === 0 ? (
+          <div className="rounded-2xl border border-slate-700 bg-slate-800 p-12 text-center text-slate-400">
+            No scores yet. Let the games begin! 🎮
+          </div>
+        ) : (
+          <>
+            {/* Podium */}
+            <div className="flex items-end justify-center gap-4">
+              {top3.map((r, i) => (
+                <div
+                  key={r.team_id}
+                  className={`flex flex-col items-center rounded-2xl p-6 ${
+                    i === 0
+                      ? "order-2 bg-gradient-to-b from-amber-500 to-amber-700"
+                      : i === 1
+                        ? "order-1 bg-gradient-to-b from-slate-400 to-slate-600"
+                        : "order-3 bg-gradient-to-b from-amber-700 to-amber-900"
+                  }`}
+                >
+                  <div className="text-4xl">{MEDALS[i]}</div>
+                  <div className="mt-2 text-lg font-bold">{r.team_name}</div>
+                  <div className="text-3xl font-black">{r.total_points}</div>
+                  <div className="text-xs opacity-75">
+                    {r.tasks_completed} tasks · rank #{r.rank}
+                  </div>
+                </div>
+              ))}
             </div>
-            <div className="text-xs text-slate-500">The Big Game</div>
-          </div>
-        </div>
-        <Link href="/" className="text-sm text-slate-500 hover:text-slate-900">
-          ← Home
-        </Link>
-      </header>
 
-      {loading ? (
-        <div className="card h-64 animate-pulse bg-slate-100" />
-      ) : rows.length === 0 ? (
-        <div className="card p-10 text-center text-slate-500">
-          No scores yet. Let the games begin! 🎮
-        </div>
-      ) : (
-        <>
-          <div className="grid gap-3 sm:grid-cols-3">
-            {top3.map((r, i) => (
-              <div
-                key={r.team_id}
-                className={`card relative overflow-hidden p-5 text-center ${
-                  i === 0 ? "border-amber-400 sm:-translate-y-2" : ""
-                }`}
-              >
-                <div className="text-4xl">{MEDALS[i]}</div>
-                <div className="mt-2 truncate font-display text-xl font-bold text-slate-900">
-                  {r.team_name}
+            {/* Rest of the leaderboard */}
+            <div className="space-y-2">
+              {rest.map((r) => (
+                <div
+                  key={r.team_id}
+                  className="flex items-center gap-4 rounded-xl bg-slate-800 px-5 py-3"
+                >
+                  <span className="w-8 text-center font-bold text-slate-400">
+                    {r.rank}
+                  </span>
+                  <span className="flex-1 font-semibold">{r.team_name}</span>
+                  <span className="text-sm text-slate-400">
+                    {r.tasks_completed} tasks
+                  </span>
+                  <span className="font-bold text-amber-400">
+                    {r.total_points} pts
+                  </span>
                 </div>
-                <div className="mt-1 font-display text-3xl font-black text-amber-600">
-                  {r.total_points}
-                </div>
-                <div className="text-xs uppercase tracking-wider text-slate-500">
-                  {r.tasks_completed} tasks · rank #{r.rank}
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          </>
+        )}
 
-          <div className="mt-5 space-y-2">
-            {rest.map((r) => (
-              <div
-                key={r.team_id}
-                className="flex items-center gap-4 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm"
-              >
-                <div className="w-8 text-center font-display text-lg font-bold text-slate-400">
-                  {r.rank}
-                </div>
-                <div className="min-w-0 flex-1 truncate font-semibold text-slate-900">
-                  {r.team_name}
-                </div>
-                <div className="text-sm text-slate-500">
-                  {r.tasks_completed} tasks
-                </div>
-                <div className="font-display text-xl font-bold text-amber-600">
-                  {r.total_points}
-                </div>
-              </div>
-            ))}
-          </div>
-        </>
-      )}
-    </main>
+        <div className="text-center">
+          <Link
+            href="/team"
+            className="text-sm text-slate-500 hover:text-white"
+          >
+            ← Back to team portal
+          </Link>
+        </div>
+      </div>
+    </div>
   );
 }

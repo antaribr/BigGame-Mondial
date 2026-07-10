@@ -110,7 +110,7 @@ export async function resetGameData(): Promise<Result> {
   }
 }
 
-/* --------------------- Member management (admin) -------------------- */
+/* ───────────────────────────────────────────────── Member management (admin) ── */
 
 export async function addTeamMember(
   teamId: string,
@@ -144,7 +144,7 @@ export async function removeTeamMember(memberId: string): Promise<Result> {
   }
 }
 
-/* --------------- Leaderboard visibility toggle (admin) --------------- */
+/* ─────────────────────────────── Leaderboard visibility toggle (admin) ───── */
 
 export async function setLeaderboardPublic(value: boolean): Promise<Result> {
   if (!(await isAdmin())) return { ok: false, error: "Unauthorized" };
