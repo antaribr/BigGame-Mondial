@@ -1,0 +1,11 @@
+{
+  "supabaseUrl": "https://YOUR-PROJECT.supabase.co",
+  "supabaseAnonKey": "YOUR_PUBLIC_ANON_KEY",
+  "adminFunction": "admin-api",
+  "quizFunction": "quiz-api",
+  "quiz": {
+    "questionCount": 20,
+    "seconds": 20,
+    "pointsPerCorrect": 0.5
+  }
+}
