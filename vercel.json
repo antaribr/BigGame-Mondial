@@ -9,6 +9,7 @@
     { "source": "/advisor", "destination": "/index.html" },
     { "source": "/advisor/:path*", "destination": "/index.html" },
     { "source": "/scoreboard", "destination": "/index.html" },
+    { "source": "/task-leader", "destination": "/index.html" },
     { "source": "/admin", "destination": "/index.html" },
     { "source": "/admin/:path*", "destination": "/index.html" }
   ],

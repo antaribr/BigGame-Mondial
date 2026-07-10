@@ -1,6 +1,6 @@
 # BigGame Mondial — Vanilla Edition
 
-A live team game, station scoring system, scoreboard, organizer dashboard, and timed QR quiz built with:
+A live team game with station scoring, evidence-based tasks, a leaderboard, organizer tools, and a timed QR quiz built with:
 
 - HTML
 - CSS
@@ -23,6 +23,11 @@ There is no UI framework, compiler, bundler, generated component system, or runt
 - Timed one-attempt QR quiz with server-side grading
 - Compatible with the existing `questions`, `quiz_attempts`, and `quiz_answers` tables—no extra assignment table
 - Question manager with Excel import/export and sample JSON import
+- Team dashboard with two large sections: **Tasks & Stations** and **Leaderboard**
+- Dedicated task-leader portal for creating tasks and reviewing evidence
+- Up to five private evidence pictures per team/task submission
+- Approve/reject workflow with leader notes and custom points
+- Approved task points included automatically in the leaderboard
 - Responsive mobile/desktop interface
 
 ## Routes
@@ -34,6 +39,7 @@ There is no UI framework, compiler, bundler, generated component system, or runt
 | `/advisor` | Enter a station code |
 | `/advisor?code=STATIONCODE` | Advisor scoring |
 | `/scoreboard` | Live scoreboard |
+| `/task-leader` | Create tasks, review evidence, and award points |
 | `/admin` | Organizer dashboard |
 | `/admin/quiz` | Quiz manager |
 | `/team/qr-form?station=QRQUIZ` | Team QR quiz |
@@ -49,6 +55,7 @@ vercel.json                 explicit Vercel build and route configuration
 api/config.js               public runtime configuration
 api/admin.js                protected organizer API
 api/quiz.js                 protected quiz/grading API
+api/tasks.js                task, evidence, upload, and leader API
 js/app.js                   browser router and application startup
 js/api.js                   public Supabase data operations
 js/pages/*.js               screen modules
@@ -67,7 +74,7 @@ supabase/schema.sql          complete database schema and policies
 3. Copy all of `supabase/schema.sql` into the editor.
 4. Run it.
 
-The schema can also update an existing BigGame database. It creates the required tables, view, security policies, scoring functions, and realtime publication entries.
+The schema can also update an existing BigGame database. It creates the required tables, private evidence bucket, leaderboard view, security policies, scoring functions, and realtime publication entries. If the core database is already configured and you only need the new evidence-task feature, run `supabase/tasks-migration.sql` instead.
 
 ## 2. Add Vercel environment variables
 
@@ -78,6 +85,7 @@ SUPABASE_URL=https://YOUR-PROJECT.supabase.co
 SUPABASE_ANON_KEY=YOUR_PUBLIC_ANON_KEY
 SUPABASE_SERVICE_ROLE_KEY=YOUR_PRIVATE_SERVICE_ROLE_KEY
 ADMIN_CODE=YOUR_PRIVATE_ADMIN_CODE
+TASK_LEADER_CODE=YOUR_PRIVATE_TASK_LEADER_CODE
 ADMIN_SESSION_SECRET=A_LONG_RANDOM_SECRET
 ```
 
@@ -103,6 +111,7 @@ openssl rand -hex 32
 
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `ADMIN_CODE`
+- `TASK_LEADER_CODE`
 - `ADMIN_SESSION_SECRET`
 
 Never place those private values in `config.json`, browser JavaScript, Git, or screenshots.
@@ -132,6 +141,20 @@ After changing environment variables, use **Redeploy → Clear build cache and r
 4. Add questions manually, import an Excel workbook, or import `data/sample-questions.json`.
 5. Return to admin and select **Show QR code**.
 6. Print or share the generated QR code.
+7. Open `/task-leader`, enter `TASK_LEADER_CODE`, and create evidence tasks.
+
+## Evidence-task workflow
+
+1. The task leader opens `/task-leader` and creates a task with instructions, order, and maximum points.
+2. The team opens its dashboard and selects **Tasks & Stations**.
+3. Stations appear first, followed by evidence tasks.
+4. The team selects **Submit evidence** and uploads 1–5 JPG, PNG, WebP, or GIF pictures (maximum 5 MB each).
+5. Evidence is stored in the private `task-evidence` Supabase Storage bucket.
+6. The task leader reviews the team name, task name, and pictures.
+7. The leader approves with 0–maximum points, or rejects with a note so the team can resubmit.
+8. Approved task points are added automatically to the main leaderboard.
+
+Run `supabase/tasks-migration.sql` on an existing database (or the complete `supabase/schema.sql`). It creates the `tasks`, `task_submissions`, and `task_evidence` tables, updates the leaderboard view, and creates the private Storage bucket.
 
 ## Excel question import and export
 
@@ -161,7 +184,7 @@ npm run serve
 
 Open <http://localhost:8080>.
 
-The small local server is plain JavaScript. It serves clean routes and static assets. Vercel API routes are not emulated by this command, so organizer and quiz API actions require a deployed Vercel URL or Vercel's local development command.
+The small local server is plain JavaScript. It serves clean routes and static assets. Vercel API routes are not emulated by this command, so organizer, quiz, task-leader, and evidence-upload actions require a deployed Vercel URL or Vercel's local development command.
 
 ### Validate and build
 
@@ -175,9 +198,10 @@ The build has no package dependencies. It validates JavaScript/JSON and copies o
 ## Security design
 
 - Correct quiz answers are never returned by the public data API.
-- Quiz grading and organizer writes run in server-side JavaScript functions.
+- Quiz grading, task reviews, and organizer writes run in server-side JavaScript functions.
+- Evidence is stored in a private bucket and accessed through short-lived signed upload/download URLs.
 - The Supabase service-role key never reaches the browser.
-- Organizer sessions are signed, expire after 12 hours, and are stored in `sessionStorage`.
+- Organizer and task-leader sessions are signed, expire after 12 hours, and are stored in `sessionStorage`.
 - Station and team codes are shared event credentials.
 - Row-level security prevents browser clients from directly editing scores, stations, settings, questions, or attempts.
 - Advisor score changes require the matching station code through protected database functions.

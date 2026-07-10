@@ -119,6 +119,24 @@ function remove(environment, table, params) {
   return rest(environment, table, { method: "DELETE", params, prefer: "return=minimal" });
 }
 
+async function deleteTaskEvidenceFiles(environment, paths) {
+  if (!paths.length) return;
+  try {
+    const result = await fetch(`${environment.supabaseUrl}/storage/v1/object/task-evidence`, {
+      method: "DELETE",
+      headers: {
+        apikey: environment.serviceKey,
+        Authorization: `Bearer ${environment.serviceKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ prefixes: paths }),
+    });
+    if (!result.ok) console.warn("Could not remove all task evidence files during reset.");
+  } catch (error) {
+    console.warn("Task evidence cleanup failed:", error.message);
+  }
+}
+
 async function handleAction(body, environment) {
   switch (body.action) {
     case "status":
@@ -183,13 +201,18 @@ async function handleAction(body, environment) {
       return { ok: true, code: "QRQUIZ" };
     }
 
-    case "resetGame":
+    case "resetGame": {
+      const evidence = await read(environment, "task_evidence", { select: "storage_path" });
+      await deleteTaskEvidenceFiles(environment, evidence.map((item) => item.storage_path));
+      await remove(environment, "task_evidence", { id: `neq.${ZERO_UUID}` });
+      await remove(environment, "task_submissions", { id: `neq.${ZERO_UUID}` });
       await remove(environment, "quiz_answers", { id: `neq.${ZERO_UUID}` });
       await remove(environment, "quiz_attempts", { id: `neq.${ZERO_UUID}` });
       await remove(environment, "completions", { id: `neq.${ZERO_UUID}` });
       await remove(environment, "members", { id: `neq.${ZERO_UUID}` });
       await remove(environment, "teams", { id: `neq.${ZERO_UUID}` });
       return { ok: true };
+    }
 
     case "adminData": {
       const [stations, teams, leaderboard, members, settingsRows] = await Promise.all([

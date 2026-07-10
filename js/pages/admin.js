@@ -95,7 +95,7 @@ export async function renderAdmin(root, context) {
       }).join("") : `<div class="empty">No teams yet.</div>`;
 
       root.innerHTML = shell(`
-        <section class="grid-3">${stat("Teams", teams.length)}${stat("Stations", stations.length)}${stat("Total scores", board.reduce((sum, row) => sum + Number(row.tasks_completed), 0))}</section>
+        <section class="grid-3">${stat("Teams", teams.length)}${stat("Stations", stations.length)}${stat("Activities scored", board.reduce((sum, row) => sum + Number(row.activities_completed ?? row.tasks_completed), 0))}</section>
         <section class="card toggle-card">
           <div class="toggle-icon">${settings.leaderboard_public ? "🌐" : "🔒"}</div>
           <div class="toggle-copy"><strong>Live leaderboard</strong><div class="small muted">${settings.leaderboard_public ? "Visible to teams" : "Hidden from teams"}</div><div class="xsmall quiet">${settings.leaderboard_public ? "Teams can see rankings and everyone’s points." : "Teams can see only their own progress."}</div></div>
@@ -120,7 +120,11 @@ export async function renderAdmin(root, context) {
           <h2 class="section-title">📱 QR code quiz</h2><p class="small muted">Create the quiz station, manage questions, monitor attempts, and print its QR code.</p>
           <div class="form-actions"><a href="/admin/quiz" data-link class="btn btn-primary">Open quiz manager</a><button id="create-qr-station" type="button" class="btn btn-ghost">Create QR station</button>${stations.some((item) => item.code === "QRQUIZ") ? `<button id="show-qr" type="button" class="btn btn-ghost">Show QR code</button>` : ""}</div>
         </section>
-        <section class="card card-pad danger-zone"><h2 class="section-title">Danger zone</h2><p class="small">Delete all teams, members, quiz attempts, answers, and scores. Stations and questions are kept.</p><button id="reset-game" class="btn btn-danger" type="button">Reset game data</button></section>
+        <section class="card card-pad">
+          <h2 class="section-title">📸 Evidence tasks</h2><p class="small muted">The task leader creates challenges, reviews team pictures, and awards points.</p>
+          <a href="/task-leader" data-link class="btn btn-primary">Open task-leader portal</a>
+        </section>
+        <section class="card card-pad danger-zone"><h2 class="section-title">Danger zone</h2><p class="small">Delete all teams, members, station scores, task evidence/submissions, and quiz attempts. Stations, tasks, and questions are kept.</p><button id="reset-game" class="btn btn-danger" type="button">Reset game data</button></section>
       `, { wide: true, action: logoutButton() });
       bindEvents();
     }
@@ -185,7 +189,7 @@ export async function renderAdmin(root, context) {
       });
       root.querySelector("#show-qr")?.addEventListener("click", showQRModal);
       root.querySelector("#reset-game")?.addEventListener("click", async (event) => {
-        if (!window.confirm("Delete ALL teams, members, scores, and quiz attempts? This cannot be undone.")) return;
+        if (!window.confirm("Delete ALL teams, members, scores, task evidence, and quiz attempts? This cannot be undone.")) return;
         const button = event.currentTarget;
         setButtonBusy(button, true, "Resetting…");
         try { await callAdmin("resetGame"); showToast("Game data reset", "success"); await load(); }

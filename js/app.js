@@ -9,6 +9,7 @@ import { renderScoreboard } from "./pages/scoreboard.js";
 import { renderAdmin } from "./pages/admin.js";
 import { renderAdminQuiz } from "./pages/admin-quiz.js";
 import { renderQuiz } from "./pages/quiz.js";
+import { renderTaskLeader } from "./pages/task-leader.js";
 
 const root = document.querySelector("#app");
 let cleanups = [];
@@ -79,6 +80,7 @@ async function renderRoute() {
     page = renderAdvisorDashboard;
     params = { code: safeDecode(match[1]) };
   } else if (path === "/scoreboard") page = renderScoreboard;
+  else if (path === "/task-leader") page = renderTaskLeader;
   else if (path === "/admin/quiz") page = renderAdminQuiz;
   else if (path === "/admin") page = renderAdmin;
 

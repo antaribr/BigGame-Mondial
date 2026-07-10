@@ -31,7 +31,7 @@ for (const name of ["config.json", "config.example.json", "manifest.json", "pack
   console.log(`✓ json ${name}`);
 }
 
-for (const name of ["index.html", "styles.css", "api/admin.js", "api/config.js", "api/quiz.js", "data/BigGame-Quiz-Import-Template.xlsx", "supabase/schema.sql"]) {
+for (const name of ["index.html", "styles.css", "api/admin.js", "api/config.js", "api/quiz.js", "api/tasks.js", "data/BigGame-Quiz-Import-Template.xlsx", "supabase/schema.sql", "supabase/tasks-migration.sql"]) {
   if (!existsSync(join(root, name))) throw new Error(`Missing required file: ${name}`);
 }
 

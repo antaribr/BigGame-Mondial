@@ -191,6 +191,42 @@ td { padding: .8rem 1rem; border-top: 1px solid #f1f5f9; vertical-align: top; }
 .answer-choice { border: 1px solid var(--line); border-radius: .6rem; padding: .55rem; background: #fff; text-align: center; }
 .answer-choice.selected { color: #047857; border-color: #10b981; background: #ecfdf5; }
 
+.team-section-buttons { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; }
+.team-section-button { display: flex; align-items: center; gap: .8rem; min-height: 5.2rem; border: 2px solid var(--line); border-radius: 1rem; padding: 1rem; color: var(--text); background: #fff; text-align: left; box-shadow: var(--shadow); }
+.team-section-button:hover { border-color: #a5b4fc; }
+.team-section-button.active { color: #3730a3; border-color: #6366f1; background: #eef2ff; }
+.team-section-button span:not(.section-button-icon) { display: flex; flex-direction: column; gap: .15rem; }
+.team-section-button small { color: var(--muted); font-size: .75rem; }
+.section-button-icon { font-size: 1.8rem; }
+
+.task-list, .submission-list { display: grid; gap: .9rem; }
+.task-card { padding: 1.1rem; }
+.task-card-head, .submission-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+.task-title { font-size: 1.05rem; font-weight: 800; }
+.task-description { margin: .8rem 0; white-space: pre-line; }
+.task-actions { display: flex; justify-content: flex-end; margin-top: 1rem; }
+.task-award { width: fit-content; margin-top: .75rem; border-radius: .65rem; padding: .45rem .7rem; color: #047857; background: #d1fae5; font-size: 1.05rem; font-weight: 850; }
+.task-status { text-transform: capitalize; white-space: nowrap; }
+.status-not-submitted, .status-draft { color: #475569; background: #f1f5f9; }
+.status-pending { color: #92400e; background: #fef3c7; }
+.status-approved { color: #047857; background: #d1fae5; }
+.status-rejected { color: #b91c1c; background: #fee2e2; }
+
+.evidence-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .45rem; margin-top: .85rem; }
+.evidence-grid a, .leader-evidence-grid a { overflow: hidden; border: 1px solid var(--line); border-radius: .65rem; background: #f8fafc; text-decoration: none; }
+.evidence-grid img { width: 100%; aspect-ratio: 1; object-fit: cover; }
+.evidence-missing { display: grid; min-height: 5rem; place-items: center; border-radius: .65rem; padding: .5rem; color: var(--quiet); background: #f1f5f9; font-size: .7rem; text-align: center; }
+
+.task-admin-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 1rem; padding: 1rem 1.25rem; border-top: 1px solid #f1f5f9; }
+.task-admin-row:first-of-type { border-top: 0; }
+.submission-card { padding: 1.25rem; }
+.submission-head h3 { margin-bottom: .3rem; }
+.leader-evidence-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr)); gap: .7rem; margin: 1rem 0; }
+.leader-evidence-grid a { display: flex; flex-direction: column; }
+.leader-evidence-grid img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+.leader-evidence-grid span { overflow: hidden; padding: .45rem; color: var(--muted); font-size: .7rem; text-overflow: ellipsis; white-space: nowrap; }
+.review-form { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+
 .scoreboard { min-height: 100vh; padding: 2.5rem 1rem; color: #fff; background: #0f172a; }
 .scoreboard .container { max-width: 58rem; }
 .scoreboard-title { font-size: clamp(2rem, 6vw, 3.4rem); text-align: center; }
@@ -233,11 +269,15 @@ td { padding: .8rem 1rem; border-top: 1px solid #f1f5f9; vertical-align: top; }
   .score-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
   .toggle-card { align-items: flex-start; flex-wrap: wrap; }
   .toggle-card .btn { width: 100%; }
+  .task-admin-row { grid-template-columns: 1fr; align-items: flex-start; }
+  .submission-head { flex-direction: column; }
   .hide-mobile { display: none; }
 }
 
 @media (max-width: 460px) {
   .card-pad { padding: 1.15rem; }
+  .team-section-buttons { grid-template-columns: 1fr; }
+  .evidence-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .grid-3 { gap: .45rem; }
   .stat { padding: .7rem .35rem; }
   .stat-value { font-size: 1.25rem; }

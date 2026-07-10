@@ -17,6 +17,8 @@ export async function renderScoreboard(root, context) {
       if (firstLoad) {
         firstLoad = false;
         context.onCleanup(subscribeToChanges(["completions", "teams"], load));
+        const poll = window.setInterval(load, 10000);
+        context.onCleanup(() => window.clearInterval(poll));
       }
     } catch (error) {
       if (!context.isActive()) return;
@@ -32,8 +34,8 @@ export async function renderScoreboard(root, context) {
     root.innerHTML = `<div class="scoreboard"><div class="container stack">
       <div class="center"><div class="small" style="color:#94a3b8"><span class="live-dot"></span>LIVE</div><h1 class="scoreboard-title">🏆 Scoreboard</h1></div>
       ${rows.length === 0 ? `<div class="card empty" style="border-color:#334155;background:#1e293b">No teams yet. Let the games begin! 🎮</div>` : `
-        <section class="podium">${top.map((row, index) => `<article class="podium-card ${classes[index]}"><div class="podium-medal">${MEDALS[index]}</div><div class="podium-name">${escapeHTML(row.team_name)}</div><div class="podium-points">${formatPoints(row.total_points)}</div><div class="xsmall" style="opacity:.78">${escapeHTML(row.tasks_completed)} stations · rank #${escapeHTML(row.rank)}</div></article>`).join("")}</section>
-        ${rest.length ? `<section class="stack-sm">${rest.map((row) => `<div class="scoreboard-row"><span class="rank">${escapeHTML(row.rank)}</span><span class="name">${escapeHTML(row.team_name)}</span><span class="small hide-mobile" style="color:#94a3b8">${escapeHTML(row.tasks_completed)} stations</span><span class="pts">${formatPoints(row.total_points)} pts</span></div>`).join("")}</section>` : ""}
+        <section class="podium">${top.map((row, index) => `<article class="podium-card ${classes[index]}"><div class="podium-medal">${MEDALS[index]}</div><div class="podium-name">${escapeHTML(row.team_name)}</div><div class="podium-points">${formatPoints(row.total_points)}</div><div class="xsmall" style="opacity:.78">${escapeHTML(row.activities_completed ?? row.tasks_completed)} activities · rank #${escapeHTML(row.rank)}</div></article>`).join("")}</section>
+        ${rest.length ? `<section class="stack-sm">${rest.map((row) => `<div class="scoreboard-row"><span class="rank">${escapeHTML(row.rank)}</span><span class="name">${escapeHTML(row.team_name)}</span><span class="small hide-mobile" style="color:#94a3b8">${escapeHTML(row.activities_completed ?? row.tasks_completed)} activities</span><span class="pts">${formatPoints(row.total_points)} pts</span></div>`).join("")}</section>` : ""}
       `}
       <div class="center"><a href="/team" data-link class="small" style="color:#64748b;text-decoration:none">← Team portal</a></div>
     </div></div>`;

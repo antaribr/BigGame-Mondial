@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 
 const root = join(fileURLToPath(new URL("../", import.meta.url)), "public");
 const port = Number(process.env.PORT) || 8080;
-const appRoutes = /^(\/(team|advisor|admin)(\/.*)?|\/scoreboard)$/;
+const appRoutes = /^(\/(team|advisor|admin)(\/.*)?|\/scoreboard|\/task-leader)$/;
 const types = {
   ".css": "text/css; charset=utf-8",
   ".html": "text/html; charset=utf-8",

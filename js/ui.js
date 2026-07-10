@@ -45,10 +45,12 @@ export function leaderboardList(rows, currentTeamId = "") {
   return `<div class="leaderboard-list">${rows.map((row) => {
     const me = row.team_id === currentTeamId;
     const rank = Number(row.rank);
+    const stations = Number(row.stations_completed ?? row.tasks_completed ?? 0);
+    const tasks = Number(row.stations_completed === undefined ? 0 : row.tasks_completed || 0);
     return `<div class="card leaderboard-item ${me ? "is-me" : ""}">
       <div class="leaderboard-row">
         <div class="rank-cell">${rank <= 3 ? MEDALS[rank - 1] : escapeHTML(rank)}</div>
-        <div class="leaderboard-main"><div class="team-name">${escapeHTML(row.team_name)} ${me ? `<span class="badge badge-muted">you</span>` : ""}</div><div class="xsmall quiet">${escapeHTML(row.tasks_completed)} stations completed</div></div>
+        <div class="leaderboard-main"><div class="team-name">${escapeHTML(row.team_name)} ${me ? `<span class="badge badge-muted">you</span>` : ""}</div><div class="xsmall quiet">${stations} stations · ${tasks} tasks</div></div>
         <div class="points">${formatPoints(row.total_points)}<small>pts</small></div>
       </div>
     </div>`;
