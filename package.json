@@ -1,0 +1,11 @@
+{
+  "name": "biggame-mondial-vanilla",
+  "version": "3.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node scripts/check.js",
+    "build": "node scripts/check.js && node scripts/build.js",
+    "serve": "node scripts/build.js && node scripts/serve.js"
+  }
+}
