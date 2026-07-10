@@ -4,10 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "build": "node scripts/check.mjs",
     "serve": "python3 server.py",
     "check": "node scripts/check.mjs"
-  },
-  "dependencies": {
-    "@supabase/supabase-js": "2.48.1"
   }
 }
