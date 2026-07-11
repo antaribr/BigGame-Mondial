@@ -16,7 +16,7 @@ function getEnvironment() {
     serviceKey,
     selectionSecret: process.env.QUIZ_SELECTION_SECRET || process.env.ADMIN_SESSION_SECRET || serviceKey,
     pointsPerCorrect: numberSetting(process.env.QUIZ_POINTS_PER_CORRECT, 0.5, 0, 100),
-    quizSeconds: numberSetting(process.env.QUIZ_SECONDS, 20, 5, 3600),
+    quizSeconds: numberSetting(process.env.QUIZ_SECONDS, 40, 5, 3600),
     questionCount: Math.trunc(numberSetting(process.env.QUIZ_QUESTION_COUNT, 20, 1, MAX_QUESTION_COUNT)),
   };
 }
