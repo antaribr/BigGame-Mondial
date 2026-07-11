@@ -214,6 +214,8 @@ td { padding: .8rem 1rem; border-top: 1px solid #f1f5f9; vertical-align: top; }
 .team-section-button small { color: var(--muted); font-size: .75rem; }
 .section-button-icon { font-size: 1.8rem; }
 
+.auto-refresh-status { display: flex; align-items: center; gap: .4rem; margin: -.2rem 0 0; color: var(--quiet); font-size: .75rem; }
+.auto-refresh-status span { color: #10b981; font-size: .65rem; }
 .task-list, .submission-list { display: grid; gap: .9rem; }
 .task-card { padding: 1.1rem; }
 .task-card-head, .submission-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
