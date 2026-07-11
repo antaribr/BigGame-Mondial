@@ -28,6 +28,7 @@ There is no UI framework, compiler, bundler, generated component system, or runt
 - Up to five private evidence pictures per team/task submission
 - Approve/reject workflow with leader notes and custom points
 - Approved task points included automatically in the leaderboard
+- Admin top-three lists for the first teams to finish all stations and all active tasks
 - Responsive mobile/desktop interface
 
 ## Routes
@@ -155,6 +156,15 @@ After changing environment variables, use **Redeploy → Clear build cache and r
 8. Approved task points are added automatically to the main leaderboard.
 
 Run `supabase/tasks-migration.sql` on an existing database (or the complete `supabase/schema.sql`). It creates the `tasks`, `task_submissions`, and `task_evidence` tables, updates the leaderboard view, and creates the private Storage bucket.
+
+## Admin top finishers
+
+The admin dashboard shows two chronological top-three lists:
+
+- First teams to complete every current station
+- First teams to receive approval for every current active task
+
+For an existing database, run `supabase/admin-finishers-migration.sql`. The finish time is the time of the final required station completion or final active-task approval. Editing points later does not change the original finish time.
 
 ## Excel question import and export
 

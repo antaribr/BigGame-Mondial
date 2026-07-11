@@ -68,6 +68,12 @@ export function formatTime(value) {
   return Number.isNaN(date.getTime()) ? "—" : date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
 }
 
+export function formatDateTime(value) {
+  if (!value) return "—";
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "—" : date.toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
+}
+
 export function setButtonBusy(button, busy, busyText = "Working…") {
   if (!button) return;
   if (busy) {

@@ -182,6 +182,73 @@ from public.teams t
 left join station_totals s on s.team_id = t.id
 left join task_totals k on k.team_id = t.id;
 
+-- Chronological top finishers for the organizer dashboard.
+drop view if exists public.station_finishers;
+create view public.station_finishers as
+with totals as (
+  select count(*)::integer as total_count from public.stations
+),
+progress as (
+  select
+    t.id as team_id,
+    t.name as team_name,
+    t.created_at as team_created_at,
+    count(distinct c.station_id)::integer as completed_count,
+    max(c.created_at) as finished_at
+  from public.teams t
+  left join public.completions c on c.team_id = t.id
+  group by t.id, t.name, t.created_at
+),
+finishers as (
+  select p.*, totals.total_count
+  from progress p cross join totals
+  where totals.total_count > 0 and p.completed_count = totals.total_count
+)
+select
+  team_id,
+  team_name,
+  completed_count,
+  total_count,
+  finished_at,
+  row_number() over (order by finished_at asc, team_created_at asc, team_name asc) as finish_order
+from finishers;
+
+drop view if exists public.task_finishers;
+create view public.task_finishers as
+with totals as (
+  select count(*)::integer as total_count from public.tasks where active = true
+),
+progress as (
+  select
+    t.id as team_id,
+    t.name as team_name,
+    t.created_at as team_created_at,
+    count(distinct k.id)::integer as completed_count,
+    max(s.reviewed_at) filter (where k.id is not null) as finished_at
+  from public.teams t
+  left join public.task_submissions s on s.team_id = t.id and s.status = 'approved'
+  left join public.tasks k on k.id = s.task_id and k.active = true
+  group by t.id, t.name, t.created_at
+),
+finishers as (
+  select p.*, totals.total_count
+  from progress p cross join totals
+  where totals.total_count > 0 and p.completed_count = totals.total_count
+)
+select
+  team_id,
+  team_name,
+  completed_count,
+  total_count,
+  finished_at,
+  row_number() over (order by finished_at asc, team_created_at asc, team_name asc) as finish_order
+from finishers;
+
+revoke all on table public.station_finishers from anon, authenticated;
+revoke all on table public.task_finishers from anon, authenticated;
+grant select on table public.station_finishers to service_role;
+grant select on table public.task_finishers to service_role;
+
 -- Row-level security. Public browser clients can register and read game data.
 -- Admin and quiz writes use the private service role only inside Vercel APIs.
 alter table public.teams enable row level security;
@@ -315,7 +382,7 @@ begin
   insert into public.completions (team_id, station_id, score)
   values (p_team_id, v_station.id, p_score)
   on conflict (team_id, station_id) do update
-    set score = excluded.score, created_at = now()
+    set score = excluded.score
   returning * into v_result;
 
   return v_result;

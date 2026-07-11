@@ -264,7 +264,6 @@ async function submitAttempt(environment, body) {
     team_id: team.id,
     station_id: station.id,
     score,
-    created_at: completedAt,
   }, "team_id,station_id");
 
   const completed = await updateReturning(environment, "quiz_attempts", {

@@ -442,11 +442,14 @@ async function handleLeaderAction(environment, body) {
       const note = String(body.note || "").trim().slice(0, 500);
       if (status === "rejected" && !note) throw new Error("Add a note explaining what evidence the team should resubmit.");
       const now = new Date().toISOString();
+      const reviewedAt = status === "approved" && submission.status === "approved" && submission.reviewed_at
+        ? submission.reviewed_at
+        : now;
       const updated = await updateReturning(environment, "task_submissions", {
         status,
         score,
         leader_note: note || null,
-        reviewed_at: now,
+        reviewed_at: reviewedAt,
         updated_at: now,
       }, { id: `eq.${id}` });
       return { ok: true, submission: updated };

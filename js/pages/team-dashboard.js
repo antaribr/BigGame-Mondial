@@ -157,6 +157,7 @@ export async function renderTeamDashboard(root, context) {
         <button type="button" class="team-section-button ${activeSection === "leaderboard" ? "active" : ""}" data-team-section="leaderboard"><span class="section-button-icon">🏆</span><span><strong>Leaderboard</strong><small>Live team rankings</small></span></button>
       </section>
       ${activeSection === "activities" ? activitiesSection : leaderboardSection}
+      <p class="technical-support"><strong>Technical Support:</strong> If you experience any technical issues with this dashboard, please reach out <strong>Ch. Ibrahim Antar</strong> for assistance.</p>
       <div class="center"><button id="forget-team" class="btn-link danger" type="button">Forget saved team on this device</button></div>
     `, { back: "/team", backLabel: "Switch team" });
 

@@ -102,6 +102,15 @@ function read(environment, table, params = {}) {
   return rest(environment, table, { params: { select: "*", ...params } });
 }
 
+async function optionalRead(environment, table, params = {}) {
+  try {
+    return await read(environment, table, params);
+  } catch (error) {
+    console.warn(`Optional admin view ${table} is unavailable:`, error.message);
+    return [];
+  }
+}
+
 function insert(environment, table, body, { upsert = false, conflict = "" } = {}) {
   return rest(environment, table, {
     method: "POST",
@@ -215,12 +224,14 @@ async function handleAction(body, environment) {
     }
 
     case "adminData": {
-      const [stations, teams, leaderboard, members, settingsRows] = await Promise.all([
+      const [stations, teams, leaderboard, members, settingsRows, stationFinishers, taskFinishers] = await Promise.all([
         read(environment, "stations", { order: "sort_order.asc,name.asc" }),
         read(environment, "teams", { order: "created_at.desc" }),
         read(environment, "leaderboard", { order: "rank.asc" }),
         read(environment, "members", { order: "created_at.asc" }),
         read(environment, "settings", { id: "eq.1", limit: 1 }),
+        optionalRead(environment, "station_finishers", { order: "finish_order.asc", limit: 3 }),
+        optionalRead(environment, "task_finishers", { order: "finish_order.asc", limit: 3 }),
       ]);
       return {
         ok: true,
@@ -228,6 +239,8 @@ async function handleAction(body, environment) {
         teams,
         leaderboard,
         members,
+        stationFinishers,
+        taskFinishers,
         settings: settingsRows[0] || { id: 1, leaderboard_public: true },
       };
     }

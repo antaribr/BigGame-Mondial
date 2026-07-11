@@ -118,6 +118,8 @@ textarea.input { min-height: 5rem; resize: vertical; }
 .quiet { color: var(--quiet); }
 .small { font-size: .875rem; }
 .xsmall { font-size: .75rem; }
+.technical-support { margin: 0; border-top: 1px solid var(--line); padding: 1rem .5rem 0; color: #475569; font-size: .82rem; line-height: 1.55; text-align: center; }
+.technical-support strong { color: #334155; }
 .eyebrow { margin-bottom: .35rem; color: var(--quiet); font-size: .75rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
 .page-title { margin-bottom: .5rem; font-size: clamp(1.7rem, 5vw, 2.2rem); line-height: 1.1; letter-spacing: -.035em; }
 .section-title { margin-bottom: .3rem; font-size: 1.2rem; }
@@ -169,6 +171,19 @@ table { width: 100%; border-collapse: collapse; font-size: .875rem; }
 th { padding: .65rem 1rem; color: var(--quiet); background: #f8fafc; font-size: .72rem; font-weight: 700; text-align: left; white-space: nowrap; }
 td { padding: .8rem 1rem; border-top: 1px solid #f1f5f9; vertical-align: top; }
 .table-action { text-align: right; }
+
+.finishers-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .9rem; }
+.finisher-card { overflow: hidden; }
+.finisher-card .card-header p { margin: .25rem 0 0; color: var(--muted); font-size: .75rem; }
+.finisher-list { display: grid; }
+.finisher-row { display: grid; grid-template-columns: 2.2rem minmax(0, 1fr) auto; align-items: center; gap: .65rem; padding: .85rem 1rem; border-top: 1px solid #f1f5f9; }
+.finisher-row:first-child { border-top: 0; }
+.finisher-medal { font-size: 1.35rem; text-align: center; }
+.finisher-team { display: flex; min-width: 0; flex-direction: column; gap: .1rem; }
+.finisher-team strong { overflow-wrap: anywhere; }
+.finisher-team span, .finisher-row time { color: var(--quiet); font-size: .72rem; }
+.finisher-row time { text-align: right; white-space: nowrap; }
+.finisher-empty { padding: 1.4rem 1rem; }
 
 .toggle-card { display: flex; align-items: center; gap: 1rem; padding: 1.25rem; }
 .toggle-icon { font-size: 1.65rem; }
@@ -265,6 +280,7 @@ td { padding: .8rem 1rem; border-top: 1px solid #f1f5f9; vertical-align: top; }
 @media (max-width: 700px) {
   .main { padding-top: 1.5rem; }
   .form-grid { grid-template-columns: 1fr; }
+  .finishers-grid { grid-template-columns: 1fr; }
   .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .score-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
   .toggle-card { align-items: flex-start; flex-wrap: wrap; }
@@ -276,6 +292,8 @@ td { padding: .8rem 1rem; border-top: 1px solid #f1f5f9; vertical-align: top; }
 
 @media (max-width: 460px) {
   .card-pad { padding: 1.15rem; }
+  .finisher-row { grid-template-columns: 2rem minmax(0, 1fr); }
+  .finisher-row time { grid-column: 2; text-align: left; }
   .team-section-buttons { grid-template-columns: 1fr; }
   .evidence-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .grid-3 { gap: .45rem; }

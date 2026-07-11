@@ -17,6 +17,7 @@ export async function renderTeamEntry(root, { navigate }) {
           <button id="join-tab" class="tab" type="button" role="tab" aria-selected="false">I have a code</button>
         </div>
         <section id="team-form-panel"></section>
+        <p class="technical-support"><strong>Technical Support:</strong> If you experience any technical issues with this dashboard, please reach out <strong>Ch. Ibrahim Antar</strong> for assistance.</p>
       </div></main>
     </div>`;
 

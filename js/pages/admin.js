@@ -1,6 +1,6 @@
 import { adminLogin, adminStatus, callAdmin, clearAdminToken } from "../admin-api.js";
 import { subscribeToChanges } from "../realtime.js";
-import { brand, copyText, escapeHTML, formatPoints, loadingPage, setButtonBusy, shell, showFormMessage, showToast, stat } from "../ui.js";
+import { brand, copyText, escapeHTML, formatDateTime, formatPoints, loadingPage, setButtonBusy, shell, showFormMessage, showToast, stat } from "../ui.js";
 
 export async function renderAdmin(root, context) {
   document.title = "Admin · BigGame";
@@ -47,6 +47,8 @@ export async function renderAdmin(root, context) {
     let teams = [];
     let board = [];
     let members = [];
+    let stationFinishers = [];
+    let taskFinishers = [];
     let settings = { id: 1, leaderboard_public: true };
     let firstLoad = true;
 
@@ -57,6 +59,8 @@ export async function renderAdmin(root, context) {
         teams = data.teams || [];
         board = data.leaderboard || [];
         members = data.members || [];
+        stationFinishers = data.stationFinishers || [];
+        taskFinishers = data.taskFinishers || [];
         settings = data.settings || { id: 1, leaderboard_public: true };
         if (!context.isActive()) return;
         draw();
@@ -74,6 +78,13 @@ export async function renderAdmin(root, context) {
 
     function logoutButton() {
       return `<button id="admin-logout" class="header-action" type="button">Logout</button>`;
+    }
+
+    function finishersList(rows, type) {
+      const unit = type === "stations" ? "stations" : "tasks";
+      if (!rows.length) return `<div class="empty finisher-empty">No team has finished all ${unit} yet.</div>`;
+      const medals = ["🥇", "🥈", "🥉"];
+      return `<div class="finisher-list">${rows.slice(0, 3).map((row, index) => `<div class="finisher-row"><span class="finisher-medal">${medals[index]}</span><div class="finisher-team"><strong>${escapeHTML(row.team_name)}</strong><span>${escapeHTML(row.completed_count)} of ${escapeHTML(row.total_count)} ${unit}</span></div><time datetime="${escapeHTML(row.finished_at)}">${escapeHTML(formatDateTime(row.finished_at))}</time></div>`).join("")}</div>`;
     }
 
     function draw() {
@@ -96,6 +107,10 @@ export async function renderAdmin(root, context) {
 
       root.innerHTML = shell(`
         <section class="grid-3">${stat("Teams", teams.length)}${stat("Stations", stations.length)}${stat("Activities scored", board.reduce((sum, row) => sum + Number(row.activities_completed ?? row.tasks_completed), 0))}</section>
+        <section class="finishers-grid">
+          <article class="card finisher-card"><div class="card-header"><h2>🏁 First to finish all stations</h2><p>Top 3 by the time their final station was completed.</p></div>${finishersList(stationFinishers, "stations")}</article>
+          <article class="card finisher-card"><div class="card-header"><h2>✅ First to finish all tasks</h2><p>Top 3 by the time their final active task was approved.</p></div>${finishersList(taskFinishers, "tasks")}</article>
+        </section>
         <section class="card toggle-card">
           <div class="toggle-icon">${settings.leaderboard_public ? "🌐" : "🔒"}</div>
           <div class="toggle-copy"><strong>Live leaderboard</strong><div class="small muted">${settings.leaderboard_public ? "Visible to teams" : "Hidden from teams"}</div><div class="xsmall quiet">${settings.leaderboard_public ? "Teams can see rankings and everyone’s points." : "Teams can see only their own progress."}</div></div>
