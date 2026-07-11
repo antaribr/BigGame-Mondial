@@ -40,18 +40,41 @@ export async function renderTaskLeader(root, context) {
     let submissions = [];
     let filter = "pending";
     let editingTask = null;
+    let formDirty = false;
+    let loading = false;
+    let lastUpdated = null;
 
-    async function load(showLoading = true) {
+    function isEditingForm() {
+      const active = document.activeElement;
+      return Boolean(active && root.contains(active) && active.closest("#task-form, .review-form"));
+    }
+
+    function showRefreshPaused() {
+      const status = root.querySelector("#leader-auto-refresh");
+      if (status) status.textContent = "Auto-refresh paused while editing";
+    }
+
+    async function load(showLoading = true, automatic = false) {
+      if (loading) return;
+      if (automatic && (formDirty || editingTask || isEditingForm())) {
+        showRefreshPaused();
+        return;
+      }
+      loading = true;
       if (showLoading) root.innerHTML = loadingPage("Loading tasks and evidence…", { wide: true });
       try {
         const data = await callTaskLeader("leaderData");
         tasks = data.tasks || [];
         submissions = data.submissions || [];
+        lastUpdated = new Date();
+        formDirty = false;
         if (context.isActive()) draw();
       } catch (error) {
         root.innerHTML = shell(`<div class="card card-pad center"><h1>Couldn’t load task data</h1><p class="alert alert-error">${escapeHTML(error.message)}</p><button id="leader-retry" class="btn btn-primary">Try again</button></div>`, { wide: true, action: logoutButton() });
         root.querySelector("#leader-retry")?.addEventListener("click", () => load());
         bindLogout();
+      } finally {
+        loading = false;
       }
     }
 
@@ -100,7 +123,7 @@ export async function renderTaskLeader(root, context) {
       </div>`).join("") : `<div class="empty">No tasks yet.</div>`;
 
       root.innerHTML = shell(`
-        <section style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap"><div><p class="eyebrow">Evidence review</p><h1 class="page-title">Task Leader</h1><p class="muted">Create tasks, review team pictures, and award points.</p></div><button id="refresh-leader" class="btn btn-ghost" type="button">Refresh</button></section>
+        <section style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap"><div><p class="eyebrow">Evidence review</p><h1 class="page-title">Task Leader</h1><p class="muted">Create tasks, review team pictures, and award points.</p><p id="leader-auto-refresh" class="auto-refresh-status"><span aria-hidden="true">●</span> Auto-refresh every 10 seconds · Updated ${escapeHTML(lastUpdated?.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" }) || "now")}</p></div><button id="refresh-leader" class="btn btn-ghost" type="button">Refresh now</button></section>
         <section class="grid-4">${stat("Tasks", tasks.length)}${stat("Pending", pending)}${stat("Approved", approved)}${stat("Rejected", rejected)}</section>
         <section class="card card-pad"><h2 class="section-title">${editingTask ? "Edit task" : "Create a task"}</h2>
           <form id="task-form" class="form-grid">
@@ -122,7 +145,8 @@ export async function renderTaskLeader(root, context) {
     function bindEvents() {
       bindLogout();
       root.querySelector("#refresh-leader")?.addEventListener("click", () => load(false));
-      root.querySelector("#cancel-task-edit")?.addEventListener("click", () => { editingTask = null; draw(); });
+      root.querySelector("#cancel-task-edit")?.addEventListener("click", () => { editingTask = null; formDirty = false; draw(); });
+      root.querySelector("#task-form")?.addEventListener("input", () => { formDirty = true; showRefreshPaused(); });
       root.querySelector("#task-form")?.addEventListener("submit", saveTask);
       root.querySelectorAll(".edit-task").forEach((button) => button.addEventListener("click", () => {
         editingTask = tasks.find((task) => task.id === button.dataset.id) || null;
@@ -138,8 +162,11 @@ export async function renderTaskLeader(root, context) {
         try { await callTaskLeader("deleteTask", { id: button.dataset.id }); showToast("Task deleted", "success"); await load(false); }
         catch (error) { showToast(error.message, "error"); }
       }));
-      root.querySelectorAll("[data-submission-filter]").forEach((button) => button.addEventListener("click", () => { filter = button.dataset.submissionFilter; draw(); }));
-      root.querySelectorAll(".review-form").forEach((form) => form.addEventListener("submit", reviewSubmission));
+      root.querySelectorAll("[data-submission-filter]").forEach((button) => button.addEventListener("click", () => { filter = button.dataset.submissionFilter; formDirty = false; draw(); }));
+      root.querySelectorAll(".review-form").forEach((form) => {
+        form.addEventListener("input", () => { formDirty = true; showRefreshPaused(); });
+        form.addEventListener("submit", reviewSubmission);
+      });
     }
 
     async function saveTask(event) {
@@ -187,5 +214,9 @@ export async function renderTaskLeader(root, context) {
     }
 
     await load();
+    const autoRefresh = window.setInterval(() => {
+      if (context.isActive() && document.visibilityState === "visible") load(false, true);
+    }, 10000);
+    context.onCleanup(() => window.clearInterval(autoRefresh));
   }
 }
