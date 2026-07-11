@@ -14,7 +14,7 @@ export default function handler(request, response) {
     supabaseAnonKey: process.env.SUPABASE_ANON_KEY || "",
     quiz: {
       questionCount: Math.trunc(numberSetting(process.env.QUIZ_QUESTION_COUNT, 20, 1, 50)),
-      seconds: numberSetting(process.env.QUIZ_SECONDS, 20, 5, 3600),
+      seconds: numberSetting(process.env.QUIZ_SECONDS, 40, 5, 3600),
       pointsPerCorrect: numberSetting(process.env.QUIZ_POINTS_PER_CORRECT, 0.5, 0, 100)
     }
   });
