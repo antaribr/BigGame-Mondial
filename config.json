@@ -3,7 +3,7 @@
   "supabaseAnonKey": "YOUR_PUBLIC_ANON_KEY",
   "quiz": {
     "questionCount": 20,
-    "seconds": 20,
+    "seconds": 40,
     "pointsPerCorrect": 0.5
   }
 }
