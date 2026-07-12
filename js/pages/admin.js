@@ -99,7 +99,7 @@ export async function renderAdmin(root, context) {
       const teamRows = teams.length ? teams.map((team) => {
         const teamMembers = memberMap.get(team.id) || [];
         return `<div style="padding:1rem 1.25rem;border-top:1px solid #f1f5f9">
-          <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap"><strong>${escapeHTML(team.name)}</strong><span class="code-badge">${escapeHTML(team.code)}</span></div>
+          <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap"><strong>${escapeHTML(team.name)}</strong><span class="code-badge">${escapeHTML(team.code)}</span><button class="btn-link edit-team-name" type="button" data-id="${team.id}" data-name="${escapeHTML(team.name)}">Edit name</button></div>
           <div class="member-chips">${teamMembers.length ? teamMembers.map((member) => `<span class="member-chip">${escapeHTML(member.name)}<button type="button" class="remove-member" data-id="${member.id}" aria-label="Remove ${escapeHTML(member.name)}">×</button></span>`).join("") : `<span class="xsmall quiet">No members</span>`}</div>
           <form class="add-member-form inline-fields" data-team="${team.id}" style="margin-top:.65rem;max-width:26rem"><input class="input" name="member" maxlength="40" placeholder="Add a member" required><button class="btn btn-ghost btn-small" type="submit">Add</button></form>
         </div>`;
@@ -111,6 +111,7 @@ export async function renderAdmin(root, context) {
           <article class="card finisher-card"><div class="card-header"><h2>🏁 First to finish all stations</h2><p>Top 3 by the time their final station was completed.</p></div>${finishersList(stationFinishers, "stations")}</article>
           <article class="card finisher-card"><div class="card-header"><h2>✅ First to finish all tasks</h2><p>Top 3 by the time their final active task was approved.</p></div>${finishersList(taskFinishers, "tasks")}</article>
         </section>
+        <section class="card card-pad report-launch-card"><div><h2 class="section-title">📊 Full game report</h2><p class="small muted">View every team’s station completion and score, every task submission and score, and the overall leaderboard.</p></div><a href="/admin/report" data-link class="btn btn-primary">Open full report</a></section>
         <section class="card toggle-card">
           <div class="toggle-icon">${settings.leaderboard_public ? "🌐" : "🔒"}</div>
           <div class="toggle-copy"><strong>Live leaderboard</strong><div class="small muted">${settings.leaderboard_public ? "Visible to teams" : "Hidden from teams"}</div><div class="xsmall quiet">${settings.leaderboard_public ? "Teams can see rankings and everyone’s points." : "Teams can see only their own progress."}</div></div>
@@ -182,6 +183,24 @@ export async function renderAdmin(root, context) {
       }));
       root.querySelectorAll(".copy-station").forEach((button) => button.addEventListener("click", () => copyText(button.dataset.code)));
 
+      root.querySelectorAll(".edit-team-name").forEach((button) => button.addEventListener("click", async () => {
+        const value = window.prompt("Enter the new team name:", button.dataset.name || "");
+        if (value === null) return;
+        const name = value.trim();
+        if (!name) { showToast("Team name cannot be empty", "error"); return; }
+        if (name.length > 40) { showToast("Team name must be 40 characters or fewer", "error"); return; }
+        if (name === button.dataset.name) return;
+        button.disabled = true;
+        try {
+          await callAdmin("updateTeamName", { id: button.dataset.id, name });
+          showToast("Team name updated", "success");
+          await load();
+        } catch (error) {
+          showToast(error.message, "error");
+          button.disabled = false;
+        }
+      }));
+
       root.querySelectorAll(".add-member-form").forEach((form) => form.addEventListener("submit", async (event) => {
         event.preventDefault();
         const input = form.elements.member;
@@ -222,7 +241,12 @@ export async function renderAdmin(root, context) {
       if (window.QRCode) new window.QRCode(backdrop.querySelector("#qr-output"), { text: url, width: 220, height: 220, correctLevel: window.QRCode.CorrectLevel.H });
       else backdrop.querySelector("#qr-output").textContent = "QR library unavailable";
       backdrop.querySelector("#copy-qr-link").addEventListener("click", () => copyText(url));
-      backdrop.querySelector("#print-qr").addEventListener("click", () => window.print());
+      backdrop.querySelector("#print-qr").addEventListener("click", () => {
+        const cleanup = () => document.body.classList.remove("printing-qr");
+        document.body.classList.add("printing-qr");
+        window.addEventListener("afterprint", cleanup, { once: true });
+        window.print();
+      });
       backdrop.querySelector("#close-qr").addEventListener("click", () => backdrop.remove());
       backdrop.addEventListener("click", (event) => { if (event.target === backdrop) backdrop.remove(); });
     }

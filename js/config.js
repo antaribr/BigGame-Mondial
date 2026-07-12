@@ -31,7 +31,7 @@ function validateConfig(config) {
   if (!config || typeof config !== "object") throw new Error("The public configuration is not valid JSON.");
   config.quiz = {
     questionCount: Math.max(1, Math.min(50, Math.trunc(Number(config.quiz?.questionCount) || 20))),
-    seconds: Math.max(5, Number(config.quiz?.seconds) || 20),
+    seconds: Math.max(5, Number(config.quiz?.seconds) || 40),
     pointsPerCorrect: Math.max(0, Number(config.quiz?.pointsPerCorrect) || 0.5),
   };
   return config;

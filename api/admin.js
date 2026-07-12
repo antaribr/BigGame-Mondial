@@ -181,6 +181,12 @@ async function handleAction(body, environment) {
       }, { upsert: true, conflict: "id" });
       return { ok: true };
 
+    case "updateTeamName":
+      await update(environment, "teams", {
+        name: requireString(body.name, "Team name", 40),
+      }, { id: `eq.${requireUuid(body.id, "Team id")}` });
+      return { ok: true };
+
     case "addMember":
       await insert(environment, "members", {
         team_id: requireString(body.teamId, "Team id", 50),
@@ -242,6 +248,27 @@ async function handleAction(body, environment) {
         stationFinishers,
         taskFinishers,
         settings: settingsRows[0] || { id: 1, leaderboard_public: true },
+      };
+    }
+
+    case "reportData": {
+      const [stations, tasks, teams, completions, taskSubmissions, leaderboard] = await Promise.all([
+        read(environment, "stations", { order: "sort_order.asc,name.asc" }),
+        read(environment, "tasks", { order: "sort_order.asc,title.asc" }),
+        read(environment, "teams", { order: "name.asc" }),
+        read(environment, "completions", { order: "created_at.asc" }),
+        read(environment, "task_submissions", { order: "created_at.asc" }),
+        read(environment, "leaderboard", { order: "rank.asc" }),
+      ]);
+      return {
+        ok: true,
+        generatedAt: new Date().toISOString(),
+        stations,
+        tasks,
+        teams,
+        completions,
+        taskSubmissions,
+        leaderboard,
       };
     }
 

@@ -18,17 +18,18 @@ There is no UI framework, compiler, bundler, generated component system, or runt
 - Advisor station-code access, scoring, editing, and undo
 - Realtime projector scoreboard
 - Protected organizer login and dashboard
-- Station/member management and game reset
+- Station, team-name, and member management with game reset
 - Public/hidden leaderboard switch
 - Timed one-attempt QR quiz with server-side grading
 - Compatible with the existing `questions`, `quiz_attempts`, and `quiz_answers` tables—no extra assignment table
 - Question manager with Excel import/export and sample JSON import
 - Team dashboard with two large sections: **Tasks & Stations** and **Leaderboard**
-- Dedicated task-leader portal for creating tasks and reviewing evidence
+- Dedicated auto-refreshing task-leader portal for creating tasks and reviewing evidence
 - Up to five private evidence pictures per team/task submission
 - Approve/reject workflow with leader notes and custom points
 - Approved task points included automatically in the leaderboard
 - Admin top-three lists for the first teams to finish all stations and all active tasks
+- Printable full report with every team’s station/task status, scores, timestamps, notes, and totals
 - Responsive mobile/desktop interface
 
 ## Routes
@@ -42,6 +43,7 @@ There is no UI framework, compiler, bundler, generated component system, or runt
 | `/scoreboard` | Live scoreboard |
 | `/task-leader` | Create tasks, review evidence, and award points |
 | `/admin` | Organizer dashboard |
+| `/admin/report` | Printable full station/task/team report |
 | `/admin/quiz` | Quiz manager |
 | `/team/qr-form?station=QRQUIZ` | Team QR quiz |
 
@@ -94,7 +96,7 @@ Optional quiz settings:
 
 ```text
 QUIZ_QUESTION_COUNT=20
-QUIZ_SECONDS=20
+QUIZ_SECONDS=40
 QUIZ_POINTS_PER_CORRECT=0.5
 ```
 

@@ -8,6 +8,7 @@ import { renderAdvisorDashboard } from "./pages/advisor-dashboard.js";
 import { renderScoreboard } from "./pages/scoreboard.js";
 import { renderAdmin } from "./pages/admin.js";
 import { renderAdminQuiz } from "./pages/admin-quiz.js";
+import { renderAdminReport } from "./pages/admin-report.js";
 import { renderQuiz } from "./pages/quiz.js";
 import { renderTaskLeader } from "./pages/task-leader.js";
 
@@ -82,6 +83,7 @@ async function renderRoute() {
   } else if (path === "/scoreboard") page = renderScoreboard;
   else if (path === "/task-leader") page = renderTaskLeader;
   else if (path === "/admin/quiz") page = renderAdminQuiz;
+  else if (path === "/admin/report") page = renderAdminReport;
   else if (path === "/admin") page = renderAdmin;
 
   if (!page) {
